@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 700 200" width="700" height="200" role="img" aria-label="Palmo">
+<title>Palmo</title>
+<g transform="scale(0.84)"><rect x="0" y="0" width="200" height="200" rx="22" fill="#D2E9D8" stroke="#1B2F4A" stroke-width="7"></rect>
+<line x1="100" y1="14" x2="100" y2="86" stroke="#89AC92" stroke-width="3.2" stroke-linecap="round"></line>
+<line x1="100" y1="114" x2="100" y2="186" stroke="#89AC92" stroke-width="3.2" stroke-linecap="round"></line>
+<line x1="14" y1="100" x2="86" y2="100" stroke="#89AC92" stroke-width="3.2" stroke-linecap="round"></line>
+<line x1="114" y1="100" x2="186" y2="100" stroke="#89AC92" stroke-width="3.2" stroke-linecap="round"></line>
+<rect x="-6" y="-6" width="112" height="112" rx="25" fill="#1B2F4A" transform="translate(0,9)"></rect>
+<rect x="-6" y="-6" width="112" height="112" rx="25" fill="#ABD7B6" stroke="#1B2F4A" stroke-width="7.5"></rect>
+<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="Nunito, system-ui, sans-serif" font-weight="900" font-size="66" fill="#1B2F4A">4</text></g>
+<g transform="translate(228,0)" font-family="Nunito, system-ui, sans-serif" font-weight="900" font-size="160" stroke="#1B2F4A" stroke-width="11" paint-order="stroke fill" stroke-linejoin="round">
+<text x="0" y="148" fill="#1B2F4A">P</text><text x="0" y="140" fill="#F0B094">P</text>
+<text x="92" y="148" fill="#1B2F4A">a</text><text x="92" y="140" fill="#E7C57E">a</text>
+<text x="174" y="148" fill="#1B2F4A">l</text><text x="174" y="140" fill="#ABD7B6">l</text>
+<text x="216" y="148" fill="#1B2F4A">m</text><text x="216" y="140" fill="#81CFC9">m</text>
+<text x="346" y="148" fill="#1B2F4A">o</text><text x="346" y="140" fill="#D987CE">o</text>
+</g>
+</svg>

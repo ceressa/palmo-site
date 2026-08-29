@@ -1,0 +1,15 @@
+{
+  "id": "/",
+  "name": "Palmo",
+  "short_name": "Palmo",
+  "description": "A quiet puzzle. The number on a seed is how many cells its region holds; grow every region to its own size until the board is covered. Coming soon to Android and iOS.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFF4FB",
+  "theme_color": "#FFF4FB",
+  "icons": [
+    {"src": "/assets/palmo-mark.svg", "sizes": "any", "type": "image/svg+xml"}
+  ]
+}

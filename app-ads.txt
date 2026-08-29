@@ -1,0 +1,25 @@
+# app-ads.txt - Palmo (com.bardino.palmo)
+#
+# HENUZ GECERLI DEGIL. Palmo icin bir AdMob uygulama kaydi ve yayinci satiri
+# yok; asagidaki DIRECT satiri yorumda bekliyor. AdMob hesabi acilip uygulama
+# olusturulunca yorum kaldirilacak ve RESELLER listesi AdMob panelinden
+# indirilip buraya eklenecek.
+#
+# Dosya bos da olsa duruyor cunku magaza kaydindaki "web sitesi" alani bu alan
+# adini gosterecek ve Google dogrulamayi burada arayacak. Yayinci satiri
+# bulunmazsa envanter "unauthorized" sayilir ve talep akisinin bir kismi
+# kesilir.
+#
+# Guncellerken:
+#   1. AdMob > Uygulamalar > app-ads.txt bolumunden guncel listeyi al.
+#   2. Satir sonlarini bozma. Colmo'nun app-ads.txt dosyasi bir web
+#      sayfasindan kopyalanirken 45 karakterde sert sarilmis ve kendi DIRECT
+#      satiri bile ikiye bolunmus durumda; ayristirici o dosyayi okuyamaz.
+#      Yazdiktan sonra kontrol et:
+#         (Get-Content app-ads.txt | Measure-Object -Line).Lines
+#      ve hicbir satirin ortasindan bolunmedigini gozle dogrula.
+#   3. Yayina aldiktan SONRA https://palmo.dozi.app/app-ads.txt adresini GET
+#      ile geri oku. Yazma isleminin "basarili" demesi yetmez.
+#
+# Beklenen ilk satir (yayinci kimligi alinunca yorum kalkacak):
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
