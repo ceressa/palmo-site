@@ -186,7 +186,10 @@ PRIVACY_EN = (
           "<strong>Consent</strong>: in the EEA and the UK, and anywhere else "
           "Google's rules require it, Google's consent form is shown before "
           "the ad library is started, and your answer is stored on the "
-          "device.",
+          "device. You are not stuck with that first answer: where the form "
+          "applies, Settings carries an <strong>Ad privacy</strong> row that "
+          "reopens it. Where it does not apply the row is not drawn, because "
+          "a row that does nothing when tapped is worse than no row.",
           "<strong>App Tracking Transparency</strong> (iOS only): before "
           "anything is requested from the ad network, iOS asks whether the app "
           "may track you across other companies' apps and websites. Saying no "
@@ -334,7 +337,11 @@ PRIVACY_TR = (
           "<strong>Rıza</strong>: AEA ve Birleşik Krallık'ta, ve Google'ın "
           "kurallarının gerektirdiği diğer yerlerde, reklam kitaplığı "
           "başlatılmadan önce Google'ın rıza formu gösterilir ve cevabın "
-          "cihazda saklanır.",
+          "cihazda saklanır. İlk cevabına mahkûm değilsin: formun geçerli "
+          "olduğu yerlerde Ayarlar'da formu yeniden açan bir "
+          "<strong>Reklam gizliliği</strong> satırı var. Geçerli olmadığı "
+          "yerlerde satır çizilmiyor, çünkü dokununca hiçbir şey yapmayan bir "
+          "satır, hiç olmamasından kötüdür.",
           "<strong>App Tracking Transparency</strong> (yalnızca iOS): reklam "
           "ağından bir şey istenmeden önce iOS, uygulamanın seni başka "
           "şirketlerin uygulama ve sitelerinde takip edip edemeyeceğini sorar. "
@@ -548,13 +555,15 @@ DELETE_EN = (
          "keep playing. If a step fails, the settings screen says so instead "
          "of pretending it worked; try again, and write to us if it keeps "
          "failing.")
-    + _p("<strong>The Account section only appears once you have linked "
-         "Google or Apple.</strong> If you have been playing anonymously and "
-         "you want the cloud copy gone, you have two ways: link an account "
-         "first, which attaches to the identity you already have and therefore "
-         "to the same save, and then delete it; or clear the save in place "
-         "with step 2 below. There is a reason we cannot do it for you by "
-         "e-mail in this case, and it is in section 3.")
+    + _p("<strong>This works whether or not you ever signed in.</strong> An "
+         "anonymous identity is an account too: it has a document in the "
+         "cloud, so it has something to delete. Making you create an account "
+         "before you are allowed to delete one would mean handing us more "
+         "about yourself in order to get rid of what we already hold, so the "
+         "row is there from the start. The <strong>Account</strong> section "
+         "appears as soon as the cloud is running; if the game cannot reach "
+         "it, the section is not drawn at all and there is nothing stored on "
+         "our side to remove.")
     + "<h2>2. Clear your progress on this device</h2>"
     + _ol("Open <strong>Settings</strong> in the game.",
           "Scroll down to <strong>Data</strong>.",
@@ -632,12 +641,14 @@ DELETE_TR = (
          "edebilesin diye seni yeni bir anonim kimlikle içeri alır. Bir adım "
          "başarısız olursa ayarlar ekranı bunu söyler, olmuş gibi yapmaz; "
          "tekrar dene, olmuyorsa bize yaz.")
-    + _p("<strong>Hesap bölümü yalnızca Google ya da Apple bağladıktan sonra "
-         "görünür.</strong> Anonim oynuyorsan ve bulut kopyasının gitmesini "
-         "istiyorsan iki yolun var: önce bir hesap bağla (bağlama zaten var "
-         "olan kimliğe, yani aynı kayda iliştirilir) ve sonra sil; ya da "
-         "aşağıdaki 2. adımla kaydı yerinde temizle. Bu durumda e-posta ile "
-         "senin adına yapamamamızın bir sebebi var, 3. bölümde yazıyor.")
+    + _p("<strong>Bu yol, hiç giriş yapmamış olsan da çalışır.</strong> Anonim "
+         "kimlik de bir hesaptır: bulutta bir belgesi vardır, yani silinecek "
+         "bir şey vardır. Bir hesabı silebilmen için önce hesap açmanı "
+         "istemek, elimizde olandan kurtulmak uğruna senden daha fazla bilgi "
+         "istemek olurdu; o yüzden satır en baştan orada. "
+         "<strong>Hesap</strong> bölümü bulut çalışır çalışmaz görünür; oyun "
+         "buluta erişemiyorsa bölüm hiç çizilmez ve bizim tarafımızda "
+         "silinecek bir şey de yoktur.")
     + "<h2>2. Bu cihazdaki ilerlemeni temizle</h2>"
     + _ol("Oyunda <strong>Ayarlar</strong>'ı aç.",
           "Aşağı kaydırıp <strong>Veriler</strong> bölümüne gel.",
