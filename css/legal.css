@@ -29,7 +29,11 @@
 }
 .yasal h2:first-child { margin-top: 0; }
 .yasal p { margin-bottom: 12px; color: var(--text); }
-.yasal ul { margin: 0 0 14px 20px; }
+/* ol da ul ile ayni girinti: satir 51'deki `* { padding: 0 }` sifirlamasi
+ * isaretleri kutunun disina itiyor ve padding olmadan numaralar kirpiliyor.
+ * Silme sayfasindaki adimlar numarali olmak zorunda (magaza formu sirali adim
+ * istiyor), o yuzden kural burada. */
+.yasal ul, .yasal ol { margin: 0 0 14px 20px; }
 .yasal li { margin-bottom: 8px; color: var(--text); }
 .yasal strong { color: var(--ink); }
 

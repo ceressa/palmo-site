@@ -20,9 +20,9 @@ APP = "Palmo"
 # Sayfa basina son guncelleme. Colmo'da tek global tarih vardi ve bir sayfa
 # degisince ucunun de tarihi degisiyordu; okuyan icin bu bir yalan.
 UPDATED = {
-    "privacy.html": "2026-08-29",
-    "terms.html": "2026-08-29",
-    "account-deletion.html": "2026-08-29",
+    "privacy.html": "2026-08-30",
+    "terms.html": "2026-08-30",
+    "account-deletion.html": "2026-08-30",
 }
 
 # Dil kodu -> (html lang, og locale, kendi dilindeki adi)
