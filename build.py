@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""palmo.dozi.app sayfalarini uretir.
+"""palmo.bardino.app sayfalarini uretir.
 
     python build.py
 

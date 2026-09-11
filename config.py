@@ -9,12 +9,12 @@ Alan adi da tek yerde: `CNAME` dosyasi elle konuldugu icin (bkz. README) icerigi
 `DOMAIN` ile ayni olmali, `build.py` derlemede bunu kontrol eder.
 """
 
-SITE = "https://palmo.dozi.app"
+SITE = "https://palmo.bardino.app"
 DOMAIN = SITE.split("//", 1)[1]
 PKG = "com.bardino.palmo"
-MAIL = "info@dozi.app"
+MAIL = "info@bardino.app"
 DEV = "Bardino Technology"
-DEV_URL = "https://dozi.app"
+DEV_URL = "https://bardino.app"
 APP = "Palmo"
 
 # Sayfa basina son guncelleme. Colmo'da tek global tarih vardi ve bir sayfa

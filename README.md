@@ -1,6 +1,6 @@
 # palmo-site
 
-[palmo.dozi.app](https://palmo.dozi.app) - Palmo'nun tanitim sayfasi, gizlilik
+[palmo.bardino.app](https://palmo.bardino.app) - Palmo'nun tanitim sayfasi, gizlilik
 politikasi, kullanim kosullari ve hesap silme sayfasi.
 
 Oyun deposu ayri: `com.bardino.palmo`, `C:\Users\Ufuk\dev\mobile\palmo`.
@@ -54,7 +54,7 @@ Bunlar uretilmiyor, repoda elle duruyor:
 Bu dosya **repoda yok, elle olusturulacak**. Icine tek satir:
 
 ```
-palmo.dozi.app
+palmo.bardino.app
 ```
 
 `build.py` dosyayi yazmiyor ama her derlemede kontrol ediyor: yoksa ya da
