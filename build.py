@@ -240,7 +240,7 @@ T["fr"] = {
     "lead": "Chaque case numérotée du plateau commence une pièce. Un 4 prend "
             "quatre cases, un 9 en prend neuf. Quand tout le plateau est fermé "
             "avec des pièces de la bonne taille, le niveau est terminé.",
-    "small": "Gratuit. Se joue hors ligne.",
+    "small": "Gratuit. Jouable hors ligne.",
     "howT": "Comment jouer",
     "how": [
         "Touche une case numérotée, puis prends les cases voisines une par "
@@ -288,7 +288,7 @@ T["pt"] = {
     "lead": "Cada casa numerada do tabuleiro começa um retalho. Um 4 pega "
             "quatro casas, um 9 pega nove. Quando o tabuleiro inteiro fecha "
             "com retalhos do tamanho certo, a fase termina.",
-    "small": "Grátis. Dá para jogar sem internet.",
+    "small": "Grátis. Funciona offline.",
     "howT": "Como jogar",
     "how": [
         "Toque numa casa numerada e vá pegando as casas vizinhas, uma a uma. "
