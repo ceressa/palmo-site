@@ -409,9 +409,8 @@ KARDES_AD = {"decimo": "Decimo", "colmo": "Colmo", "palmo": "Palmo"}
 
 
 def kardes_url(g, code):
-    """Kardesin sitesi, ayni dilde. Decimo'nun sitesi yalniz Turkce."""
-    if g == "decimo":
-        return "https://decimo.bardino.app/"
+    """Kardesin sitesi, ayni dilde. Uc site de ayni yapida: kok Ingilizce,
+    digerleri /<kod>/ (Decimo'nun sitesi Ekim 2026'da alti dile gecti)."""
     return "https://%s.bardino.app/%s" % (g, "" if code == "en" else code + "/")
 
 
