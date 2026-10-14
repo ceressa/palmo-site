@@ -16,6 +16,8 @@ MAIL = "info@bardino.app"
 DEV = "Bardino Technology"
 DEV_URL = "https://bardino.app"
 APP = "Palmo"
+APP_STORE = "https://apps.apple.com/app/palmo-number-weave/id6806719070"
+GOOGLE_PLAY = "https://play.google.com/store/apps/details?id=" + PKG
 
 # Sayfa basina son guncelleme. Colmo'da tek global tarih vardi ve bir sayfa
 # degisince ucunun de tarihi degisiyordu; okuyan icin bu bir yalan.

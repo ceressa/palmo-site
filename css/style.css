@@ -129,18 +129,13 @@ a { color: var(--pink-dark); }
 .alt { font-size: 18px; color: var(--text-2); max-width: 48ch; }
 .kucuk { margin-top: 14px; font-size: 14px; color: var(--text-2); font-weight: 800; }
 
-/* Magaza yeri. Oyun yayinda olmadigi icin burada baglanti YOK: tiklanmayan bir
-   rozet, tiklaninca hicbir yere gitmeyen bir dugmeden durust. Cikinca bu iki
-   span <a> olur ve magaza rozetleri buraya gelir. */
+/* Magaza rozetleri resmi dosyalar, olduklari gibi: kabartma, cerceve ya da
+   renk eklenmez (Apple ve Google kilavuzu). Kati golge kurali burada islemez.
+   Iki rozet arasi en az rozet boyunun dortte biri. */
 .magaza { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; }
-.magaza-cip {
-  display: inline-flex; align-items: baseline; gap: 8px;
-  background: var(--surface); color: var(--ink);
-  border: var(--s-patch) solid var(--ink); border-radius: var(--r-pill);
-  box-shadow: var(--lift-chrome);
-  padding: 9px 18px; font-weight: 900; font-size: 15px;
-}
-.magaza-cip b { color: var(--text-2); font-size: 13px; font-weight: 800; }
+.magaza a { display: block; }
+.magaza img { height: 48px; width: auto; }
+.kapanis .magaza { justify-content: center; }
 
 .telefon { display: flex; justify-content: center; }
 .telefon img {

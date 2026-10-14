@@ -17,9 +17,10 @@ konulup yeniden derlenince bolum kendiliginden gercege doner.
 import io
 import os
 import re
+import struct
 
-from config import (APP, DEV, DEV_URL, DOMAIN, LANGS, LEGAL_LANGS, LEGAL_PAGES,
-                    PKG, ROOT_LANG, SITE, UPDATED)
+from config import (APP, APP_STORE, DEV, DEV_URL, DOMAIN, GOOGLE_PLAY, LANGS,
+                    LEGAL_LANGS, LEGAL_PAGES, PKG, ROOT_LANG, SITE, UPDATED)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,14 +33,20 @@ ICON_PNG = "assets/palmo-icon.png"  # apple-touch-icon, 180x180
 MARK = "assets/palmo-mark.svg"
 LOCKUP = "assets/palmo-lockup-h.svg"
 
+# Magaza rozetleri resmi dosyalar (Decimo deposu, store_assets/badges), her
+# dilin kendi rozeti. Google PNG'sinin seffaf kenari kirpildi: kirpilmadan ayni
+# boya getirilince Google rozeti Apple'inkinden kucuk gorunuyor, Google'in
+# kilavuzu ise esit ya da buyuk istiyor. Apple rozeti sirada once gelir.
+BADGE_H = 48
+
 T = {}
 
 T["en"] = {
     "title": "Palmo - Weave the whole board",
     "desc": "A quiet puzzle. The number on a seed is how many cells its region "
             "holds; grow every region to its own size until the board is "
-            "covered. Coming soon to Android and iOS.",
-    "badge": "Coming soon",
+            "covered. Free on Android and iOS.",
+    "badge": "Out now",
     "h1a": "The number on a seed",
     "h1b": "is the size of its region.",
     "lead": "Palmo is a quiet puzzle. Every seed carries a number, and that "
@@ -52,9 +59,9 @@ T["en"] = {
     "caps": ["The board", "A region settling", "The end of a level",
              "The map"],
     "ph": "Screenshot coming",
-    "endT": "Not out yet.",
-    "endS": "Palmo is still in the workshop. This page will carry the store "
-            "links the day it is out.",
+    "endT": "Out now.",
+    "endS": "Free on the App Store and Google Play.",
+    "stores": ("Palmo on the App Store", "Palmo on Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacy", "Terms of use", "Account deletion"),
     "by": "Palmo is made by",
@@ -68,8 +75,8 @@ T["tr"] = {
     "title": "Palmo - Bütün tahtayı doku",
     "desc": "Sessiz bir bulmaca. Tohumdaki rakam, o bölgenin kaç hücre "
             "olduğunu söyler; her bölgeyi tam kendi büyüklüğüne kadar büyüt ve "
-            "tahtayı kapat. Android ve iOS'ta çok yakında.",
-    "badge": "Çok yakında",
+            "tahtayı kapat. Android ve iOS'ta ücretsiz.",
+    "badge": "Yayında",
     "h1a": "Tohumdaki rakam,",
     "h1b": "o bölgenin büyüklüğüdür.",
     "lead": "Palmo sessiz bir bulmacadır. Her tohum bir rakam taşır ve o "
@@ -81,9 +88,9 @@ T["tr"] = {
     "shotsS": "Hepsi gerçek ekran görüntüsü, temsili değil.",
     "caps": ["Tahta", "Yerine oturan bir bölge", "Bölümün sonu", "Harita"],
     "ph": "Ekran görüntüsü yakında",
-    "endT": "Henüz çıkmadı.",
-    "endS": "Palmo hâlâ atölyede. Çıktığı gün mağaza bağlantıları bu sayfada "
-            "olacak.",
+    "endT": "Çıktı.",
+    "endS": "App Store ve Google Play'de ücretsiz.",
+    "stores": ("App Store'da Palmo", "Google Play'de Palmo"),
     "bandAlt": "Palmo",
     "legal": ("Gizlilik", "Kullanım koşulları", "Hesap silme"),
     "by": "Palmo'yu yapan",
@@ -97,8 +104,8 @@ T["de"] = {
     "title": "Palmo - Webe das ganze Brett",
     "desc": "Ein ruhiges Puzzle. Die Zahl auf einem Samen sagt, wie viele "
             "Felder sein Gebiet umfasst; lass jedes Gebiet auf seine eigene "
-            "Größe wachsen. Bald für Android und iOS.",
-    "badge": "Bald verfügbar",
+            "Größe wachsen. Kostenlos für Android und iOS.",
+    "badge": "Jetzt erhältlich",
     "h1a": "Die Zahl auf einem Samen",
     "h1b": "ist die Größe seines Gebiets.",
     "lead": "Palmo ist ein ruhiges Puzzle. Jeder Samen trägt eine Zahl, und "
@@ -111,9 +118,9 @@ T["de"] = {
     "caps": ["Das Brett", "Ein Gebiet setzt sich", "Das Ende eines Levels",
              "Die Karte"],
     "ph": "Screenshot folgt",
-    "endT": "Noch nicht erschienen.",
-    "endS": "Palmo ist noch in der Werkstatt. Am Tag der Veröffentlichung "
-            "stehen die Store-Links hier.",
+    "endT": "Jetzt erhältlich.",
+    "endS": "Kostenlos im App Store und bei Google Play.",
+    "stores": ("Palmo im App Store", "Palmo bei Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Datenschutz", "Nutzungsbedingungen", "Konto löschen"),
     "by": "Palmo stammt von",
@@ -127,8 +134,8 @@ T["es"] = {
     "title": "Palmo - Teje todo el tablero",
     "desc": "Un puzle tranquilo. El número de la semilla dice cuántas casillas "
             "tiene su región; haz crecer cada región hasta su tamaño exacto. "
-            "Muy pronto en Android e iOS.",
-    "badge": "Muy pronto",
+            "Gratis en Android e iOS.",
+    "badge": "Ya disponible",
     "h1a": "El número de la semilla",
     "h1b": "es el tamaño de su región.",
     "lead": "Palmo es un puzle tranquilo. Cada semilla lleva un número, y ese "
@@ -141,9 +148,9 @@ T["es"] = {
     "caps": ["El tablero", "Una región que se asienta", "El final de un nivel",
              "El mapa"],
     "ph": "Captura próximamente",
-    "endT": "Todavía no ha salido.",
-    "endS": "Palmo sigue en el taller. El día del lanzamiento los enlaces de "
-            "las tiendas estarán aquí.",
+    "endT": "Ya disponible.",
+    "endS": "Gratis en el App Store y Google Play.",
+    "stores": ("Palmo en el App Store", "Palmo en Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacidad", "Términos de uso", "Eliminar cuenta"),
     "by": "Palmo está hecho por",
@@ -157,8 +164,8 @@ T["fr"] = {
     "title": "Palmo - Tisse tout le plateau",
     "desc": "Un puzzle calme. Le chiffre de la graine indique combien de cases "
             "compte sa région ; fais grandir chaque région jusqu'à sa taille "
-            "exacte. Bientôt sur Android et iOS.",
-    "badge": "Bientôt disponible",
+            "exacte. Gratuit sur Android et iOS.",
+    "badge": "Disponible",
     "h1a": "Le chiffre de la graine",
     "h1b": "est la taille de sa région.",
     "lead": "Palmo est un puzzle calme. Chaque graine porte un chiffre, et ce "
@@ -171,9 +178,9 @@ T["fr"] = {
     "caps": ["Le plateau", "Une région qui se pose", "La fin d'un niveau",
              "La carte"],
     "ph": "Capture à venir",
-    "endT": "Pas encore sorti.",
-    "endS": "Palmo est encore à l'atelier. Les liens vers les stores seront "
-            "ici le jour de la sortie.",
+    "endT": "Disponible maintenant.",
+    "endS": "Gratuit sur l'App Store et Google Play.",
+    "stores": ("Palmo sur l'App Store", "Palmo sur Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Confidentialité", "Conditions d'utilisation",
               "Suppression du compte"),
@@ -187,9 +194,9 @@ T["fr"] = {
 T["pt"] = {
     "title": "Palmo - Teça o tabuleiro inteiro",
     "desc": "Um puzzle tranquilo. O número da semente diz quantas células a "
-            "região tem; faça cada região crescer até o seu tamanho exato. Em "
-            "breve para Android e iOS.",
-    "badge": "Em breve",
+            "região tem; faça cada região crescer até o seu tamanho exato. "
+            "Grátis para Android e iOS.",
+    "badge": "Já disponível",
     "h1a": "O número da semente",
     "h1b": "é o tamanho da sua região.",
     "lead": "Palmo é um puzzle tranquilo. Cada semente carrega um número, e "
@@ -202,9 +209,9 @@ T["pt"] = {
     "caps": ["O tabuleiro", "Uma região se assentando", "O fim de uma fase",
              "O mapa"],
     "ph": "Captura em breve",
-    "endT": "Ainda não lançado.",
-    "endS": "Palmo ainda está na oficina. No dia do lançamento os links das "
-            "lojas estarão aqui.",
+    "endT": "Já disponível.",
+    "endS": "Grátis na App Store e no Google Play.",
+    "stores": ("Palmo na App Store", "Palmo no Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacidade", "Termos de uso", "Excluir conta"),
     "by": "Palmo é feito por",
@@ -395,6 +402,30 @@ def _shot(rel, cap, ph, eager=False):
             '</div>' % (esc(cap), esc(ph)))
 
 
+def badge_width(rel):
+    """Rozetin BADGE_H yuksekligindeki genisligi (img width/height icin)."""
+    p = os.path.join(HERE, rel.replace("/", os.sep))
+    if rel.endswith(".svg"):
+        m = re.search(r'<svg[^>]*?\swidth="([\d.]+)"[^>]*?\sheight="([\d.]+)"',
+                      io.open(p, encoding="utf-8").read())
+        w, h = float(m.group(1)), float(m.group(2))
+    else:
+        w, h = struct.unpack(">II", io.open(p, "rb").read(24)[16:24])
+    return round(w * BADGE_H / h)
+
+
+def stores(code, t):
+    a_alt, g_alt = t["stores"]
+    a_img = "assets/badges/%s/app_store.svg" % code
+    g_img = "assets/badges/%s/google_play.png" % code
+    return ('<div class="magaza">'
+            '<a href="%s"><img src="/%s" alt="%s" width="%d" height="%d"></a>'
+            '<a href="%s"><img src="/%s" alt="%s" width="%d" height="%d"></a>'
+            '</div>'
+            % (APP_STORE, a_img, esc(a_alt), badge_width(a_img), BADGE_H,
+               GOOGLE_PLAY, g_img, esc(g_alt), badge_width(g_img), BADGE_H))
+
+
 def landing(code, t):
     """Acilis sayfasi.
 
@@ -437,10 +468,7 @@ def landing(code, t):
             <h1>%(h1a)s<br><em>%(h1b)s</em></h1>
             <p class="alt">%(lead)s</p>
             <p class="kucuk">%(small)s</p>
-            <div class="magaza">
-                <span class="magaza-cip">Google Play <b>%(badge)s</b></span>
-                <span class="magaza-cip">App Store <b>%(badge)s</b></span>
-            </div>
+            %(stores)s
         </div>
         <div class="telefon">%(hero)s</div>
     </div>
@@ -459,13 +487,15 @@ def landing(code, t):
         <div class="kutu">
             <h2>%(endT)s</h2>
             <p class="bolum-alt">%(endS)s</p>
+            %(stores)s
         </div>
     </div>
 </section>
 """ % dict(badge=esc(t["badge"]), h1a=esc(t["h1a"]), h1b=esc(t["h1b"]),
            lead=esc(t["lead"]), small=esc(t["small"]), hero=hero_gorsel,
            band=band, shotsT=esc(t["shotsT"]), shotsS=esc(t["shotsS"]),
-           shots=shots, endT=esc(t["endT"]), endS=esc(t["endS"]))
+           shots=shots, endT=esc(t["endT"]), endS=esc(t["endS"]),
+           stores=stores(code, t))
             + """
 <script type="application/ld+json">
 {

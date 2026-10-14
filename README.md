@@ -140,10 +140,10 @@ gonderilir.
 Tarihler sayfa basina: `config.py` icindeki `UPDATED` sozlugu. Bir sayfa
 degisince yalnizca onun tarihi elle yukseltilir.
 
-## Cikinca yapilacak
+## Magaza baglantilari
 
-- Kahraman bolumundeki `.magaza-cip` iki `<span>`, cunku gidilecek yer yok.
-  Magaza baglantilari hazir olunca ikisi `<a>` olur; metinler `build.py`
-  icindeki `badge`, `endT`, `endS` anahtarlarinda.
-- `assets/shots/` gercek karelerle dolar.
-- `app-ads.txt` icindeki DIRECT satirinin yorumu kalkar.
+Palmo Eylul 2026'dan beri iki magazada. Baglantilar `config.py` icindeki
+`APP_STORE` / `GOOGLE_PLAY`, rozetler `assets/badges/<dil>/` altinda: Decimo
+deposundaki `store_assets/badges` klasorunden, her dilin resmi rozeti. Google
+PNG'sinin seffaf kenari kirpildi ki iki rozet ayni gorunen boyda dursun.
+Rozete golge ya da cerceve eklenmez (Apple ve Google kilavuzu).
