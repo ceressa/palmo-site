@@ -30,9 +30,13 @@ IKI SEY BILEREK BOYLE YAZILDI, kisaltilmasin:
   1. "Ilerlemeyi sifirla" buluttaki BELGEYI SILMEZ. Yerel durumu temizler,
      sonraki esitleme o temiz durumu belgenin uzerine yazar (`push` merge'siz
      `set` kullaniyor). Belgeyi ve kimligi silen tek yol "Hesabi sil".
-  2. "Hesabi sil" satiri yalnizca Google/Apple BAGLIYKEN ciziliyor
-     (`settings_page.dart`, `_accountRows`). Anonim oyuncuya gorunmuyor;
-     silme sayfasi bu yuzden anonim oyuncuya ayri bir yol tarif ediyor.
+  2. "Hesabi sil" satiri anonim oyuncuya da ciziliyor (`settings_page.dart`,
+     `_signInRows` ve `_accountRows`, 14 Ekim 2026'da origin/main'de
+     dogrulandi); Hesap bolumu yalnizca bulut hazirken (`readyNow`) var.
+
+14 Ekim 2026: Turkce metin "siz" ile yazildi (uc oyunun yasal metni ayni
+hitapla). Firestore yolu (/users/{uid}) metinden cikarildi, yerine "bulut
+kaydiniz, anonim kimliginizin altinda" deniyor; anlam ayni.
 """
 
 from config import MAIL, PKG, DEV, APP
@@ -57,7 +61,10 @@ def _ol(*items):
 
 
 def _mail():
-    return '<a href="mailto:%s">%s</a>' % (MAIL, MAIL)
+    # email_off: Cloudflare'in e-posta gizlemesi adresi JavaScript'siz 404
+    # veren bir baglantiya ceviriyordu (bkz. build.py mail_link).
+    return ('<!--email_off--><a href="mailto:%s">%s</a><!--/email_off-->'
+            % (MAIL, MAIL))
 
 
 # ── Gizlilik ────────────────────────────────────────────────────────────────
@@ -65,12 +72,11 @@ def _mail():
 PRIVACY_EN = (
     "<h2>1. Overview</h2>"
     + _p("%s is a puzzle game made by %s. This page says what the game keeps "
-         "on your phone, what it sends away, who receives it and how to get "
-         "rid of it." % (APP, DEV),
+         "on your phone, what it sends away, who receives it and how to "
+         "delete it." % (APP, DEV),
          "It describes the game as it is built today, including the cloud "
          "save, the optional sign-in, the analytics events and the crash "
-         "reporting. An earlier version of this page described a build that "
-         "had none of those; it was replaced on the day they shipped.")
+         "reporting.")
     + "<h2>2. Your identity in the game</h2>"
     + _p("The first time you open %s it asks Firebase Authentication for an "
          "<strong>anonymous identity</strong>. This happens on its own. You "
@@ -112,9 +118,8 @@ PRIVACY_EN = (
           "made by the game, not read from the phone; reinstalling produces a "
           "new one.")
     + "<h2>4. What is saved to the cloud</h2>"
-    + _p("The game keeps one document per player in Cloud Firestore, at the "
-         "path <strong>/users/{your identity}</strong>. There are no other "
-         "collections and no sub-documents. It holds:")
+    + _p("The game keeps one cloud save per player in Cloud Firestore, filed "
+         "under your anonymous identity. It holds:")
     + _ul("levels cleared and stars per level;",
           "the lifetime counters (regions settled, cells taken, nine-cell "
           "regions);",
@@ -130,10 +135,10 @@ PRIVACY_EN = (
          "purchase belongs to the store, which is the only thing that can "
          "confirm it.")
     + _p("The database rules require that a request is signed in and that the "
-         "identity in the request matches the identity in the path, for "
-         "reading, writing and deleting alike. There is no query that lists "
-         "the collection, so one save cannot be reached from another. Every "
-         "path outside this one is refused by default. The rules are "
+         "identity making it is the identity the save is filed under, for "
+         "reading, writing and deleting alike. Players have no query that "
+         "lists the saves, so one save cannot be reached from another. "
+         "Everything else in the database is refused by default. The rules are "
          "published as part of every deployment.")
     + _p("The cloud copy is a convenience. If Firebase cannot start, if the "
          "network is down or if a write is refused, the game carries on from "
@@ -188,8 +193,7 @@ PRIVACY_EN = (
           "the ad library is started, and your answer is stored on the "
           "device. You are not stuck with that first answer: where the form "
           "applies, Settings carries an <strong>Ad privacy</strong> row that "
-          "reopens it. Where it does not apply the row is not drawn, because "
-          "a row that does nothing when tapped is worse than no row.",
+          "reopens it. Where it does not apply, the row is not shown.",
           "<strong>App Tracking Transparency</strong> (iOS only): before "
           "anything is requested from the ad network, iOS asks whether the app "
           "may track you across other companies' apps and websites. Saying no "
@@ -214,162 +218,160 @@ PRIVACY_EN = (
          "game does show ads, so it is rated for a general audience rather "
          "than declared a children's app." % APP)
     + "<h2>11. Changes</h2>"
-    + _p("Material changes to this page are published here with a new date. "
-         "When the game gained cloud save, sign-in and measurement, this page "
-         "was rewritten rather than patched, because the previous version "
-         "said the opposite. The same applies next time.")
+    + _p("Material changes to this page are published here with a new date.")
     + "<h2>12. Contact</h2>"
     + _p("%s &middot; %s" % (_mail(), PKG)))
 
 PRIVACY_TR = (
     "<h2>1. Genel bakış</h2>"
     + _p("%s, %s tarafından yapılan bir bulmaca oyunudur. Bu sayfa oyunun "
-         "telefonunda ne tuttuğunu, dışarı ne gönderdiğini, kimin aldığını ve "
-         "bunlardan nasıl kurtulacağını anlatır." % (APP, DEV),
-         "Anlatılan şey oyunun bugünkü hali: bulut kaydı, isteğe bağlı giriş, "
-         "ölçüm olayları ve çökme raporlaması dahil. Bu sayfanın önceki "
-         "sürümü bunların hiçbirinin bulunmadığı bir yapıyı anlatıyordu; "
-         "özellikler çıktığı gün değiştirildi.")
-    + "<h2>2. Oyundaki kimliğin</h2>"
-    + _p("%s'yu ilk açtığında Firebase Authentication'dan bir "
-         "<strong>anonim kimlik</strong> ister. Bu kendiliğinden olur. Senden "
-         "isim, e-posta ya da telefon istenmez, kayıt ekranı yoktur ve oyunun "
-         "hiçbir yerinde giriş kapısı yoktur. Kimlik rastgele bir dizedir ve "
-         "tek işi, bulut kaydının durduğu klasörün adı olmaktır." % APP)
+         "telefonunuzda ne tuttuğunu, dışarıya ne gönderdiğini, bunları kimin "
+         "aldığını ve nasıl silebileceğinizi anlatır." % (APP, DEV),
+         "Anlatılan, oyunun bugünkü halidir: bulut kaydı, isteğe bağlı giriş, "
+         "ölçüm olayları ve çökme raporlaması dahil.")
+    + "<h2>2. Oyundaki kimliğiniz</h2>"
+    + _p("%s'yu ilk açtığınızda oyun, Firebase Authentication'dan bir "
+         "<strong>anonim kimlik</strong> ister. Bu kendiliğinden olur. Sizden "
+         "isim, e-posta adresi ya da telefon numarası istenmez; kayıt ekranı "
+         "yoktur ve oyunun hiçbir yerinde giriş zorunluluğu yoktur. Kimlik "
+         "rastgele bir karakter dizisidir ve tek işi, bulut kaydınızın "
+         "durduğu klasörün adı olmaktır." % APP)
     + _p("<strong>Google</strong> ya da <strong>Apple</strong> hesabı bağlamak "
-         "isteğe bağlıdır. Tek amacı oyunu ikinci bir cihazda, ya da aynı "
-         "cihazda yeniden kurduktan sonra kaldığın yerden sürdürebilmendir. "
-         "Bağlama, yeni bir kimlik üretmez, var olan anonim kimliği dönüştürür; "
-         "yani elindeki kayıt yerinden kıpırdamaz.")
+         "isteğe bağlıdır. Tek amacı, oyuna ikinci bir cihazda ya da aynı "
+         "cihazda yeniden kurulumdan sonra kaldığınız yerden devam "
+         "edebilmenizdir. Bağlama yeni bir kimlik üretmez, var olan anonim "
+         "kimliği dönüştürür; yani mevcut kaydınız olduğu yerde kalır.")
     + _ul("<strong>Google</strong>: giriş, Firebase'e bir kimlik jetonu "
-          "iletir; hesabın senin olduğunu kanıtlayan şey odur.",
+          "iletir; hesabın size ait olduğunu kanıtlayan budur.",
           "<strong>Apple</strong>: iOS'ta sunulur. Oyun yalnızca e-posta "
-          "kapsamını ister. Apple bir takma adres verebilir, hiç adres "
-          "vermeyebilir, verirse de yalnızca ilk yetkilendirmede verir.",
+          "kapsamını ister. Apple bir yönlendirme adresi verebilir ya da hiç "
+          "adres vermeyebilir; verirse de yalnızca ilk yetkilendirmede verir.",
           "Bir adres geldiyse Firebase Authentication onu cihazda tutar ve "
-          "Ayarlar ekranı hangi hesapta olduğunu görebilesin diye gösterir. "
-          "Adres yoksa o satırda <em>Bağlı</em> yazar.")
-    + "<h2>3. Cihazında kalanlar</h2>"
+          "Ayarlar ekranı, hangi hesapla bağlı olduğunuzu görebilmeniz için "
+          "onu gösterir. Adres yoksa o satırda <em>Bağlı</em> yazar.")
+    + "<h2>3. Cihazınızda kalanlar</h2>"
     + _p("Bunların hepsi işletim sisteminin kendi tercih deposuna yazılır. "
          "Oyunun asıl hafızası burasıdır: bir sonraki bölümde anlatılan bulut "
          "kopyası buradan üretilir, tersi değil.")
-    + _ul("<strong>İlerleme</strong>: hangi bölümleri geçtiğin, her birinde "
-          "kaç yıldızın olduğu ve ömür boyu oturttuğun bölge, aldığın hücre, "
-          "kurduğun dokuz hücrelik bölge sayıları.",
+    + _ul("<strong>İlerleme</strong>: hangi bölümleri geçtiğiniz, her birinde "
+          "kaç yıldızınız olduğu; ayrıca toplamda oturttuğunuz bölge, "
+          "aldığınız hücre ve kurduğunuz dokuz hücrelik bölge sayıları.",
           "<strong>Ayarlar</strong>: ses, müzik, titreşim, yol ipucu ve "
-          "seçtiğin dil.",
+          "seçtiğiniz dil.",
           "<strong>Canlar ve sayacı</strong>, o gün kaç ödüllü reklam "
-          "izlediğin ve reklamsız sürümü satın alıp almadığın.",
+          "izlediğiniz ve reklamsız sürümü satın alıp almadığınız.",
           "<strong>Jokerler</strong> ve hangi bölük ödüllerinin ödendiği.",
           "<strong>İç işleyiş</strong>: son reklamdan bu yana geçen süre, "
-          "öğreticiyi görüp görmediğin, reklam rıza formuna verdiğin cevap, ve "
-          "buluta en son hangi kurulumun yazdığını işaretleyen, cihazda "
-          "üretilmiş rastgele bir işaret. O işaret telefondan okunmaz, oyun "
-          "tarafından üretilir; uygulamayı yeniden kurmak yenisini yaratır.")
+          "öğreticiyi görüp görmediğiniz, reklam rıza formuna verdiğiniz "
+          "cevap ve buluta en son hangi kurulumun yazdığını işaretleyen, "
+          "cihazda üretilmiş rastgele bir tanımlayıcı. Bu tanımlayıcı "
+          "telefondan okunmaz, oyun tarafından üretilir; uygulamayı yeniden "
+          "kurmak yenisini üretir.")
     + "<h2>4. Buluta gidenler</h2>"
-    + _p("Oyun, Cloud Firestore'da oyuncu başına tek bir belge tutar; yolu "
-         "<strong>/users/{kimliğin}</strong>. Başka koleksiyon ve alt belge "
-         "yoktur. Belgede şunlar durur:")
-    + _ul("geçtiğin bölümler ve bölüm başına yıldız;",
-          "ömür boyu sayaçlar (oturtulan bölge, alınan hücre, dokuz hücrelik "
+    + _p("Oyun, Cloud Firestore'da her oyuncu için tek bir bulut kaydı tutar; "
+         "kayıt anonim kimliğinizin altında durur. Kayıtta şunlar bulunur:")
+    + _ul("geçtiğiniz bölümler ve bölüm başına yıldız;",
+          "toplam sayaçlar (oturtulan bölge, alınan hücre, dokuz hücrelik "
           "bölge);",
           "joker sayıları ve ödenmiş bölük ödülleri;",
-          "hangi dersleri öğrendiğin ve öğreticinin görülüp görülmediği;",
-          "ayarların: müzik, ses, titreşim, yol ipucu ve dil;",
-          "üç tane defter alanı: biçim sürümü, en son yazan kurulumun işareti "
+          "hangi dersleri öğrendiğiniz ve öğreticinin görülüp görülmediği;",
+          "ayarlarınız: müzik, ses, titreşim, yol ipucu ve dil;",
+          "üç kayıt alanı: biçim sürümü, en son yazan kurulumun tanımlayıcısı "
           "ve o yazmanın sunucu zaman damgası.")
-    + _p("<strong>Üç şey bilerek gönderilmiyor</strong>: canların ve sayacı, "
-         "günlük ödüllü reklam hakların, ve reklamsızlık işareti. Can bir "
-         "varlık değil bir zaman kapısıdır; reklamsız satın alma ise "
+    + _p("<strong>Üç şey bilerek gönderilmez</strong>: canlarınız ve sayacı, "
+         "günlük ödüllü reklam haklarınız ve reklamsızlık işareti. Can bir "
+         "varlık değil, bir zaman sınırıdır; reklamsız satın alma ise "
          "mağazaya aittir ve onu doğrulayabilecek tek yer mağazadır.")
-    + _p("Veri tabanı kuralları, isteğin giriş yapmış olmasını ve istekteki "
-         "kimliğin yoldaki kimlikle aynı olmasını şart koşar; okumada, yazmada "
-         "ve silmede aynı şekilde. Koleksiyonu listeleyen bir sorgu "
-         "tanımlanmadığı için bir kayıttan başka bir kayda ulaşılamaz. Bu "
-         "yolun dışındaki her yol varsayılan olarak reddedilir. Kurallar her "
-         "dağıtımın parçası olarak yayımlanır.")
+    + _p("Veritabanı kuralları, isteğin giriş yapılmış bir kimlikten "
+         "gelmesini ve bu kimliğin kaydın altında durduğu kimlikle aynı "
+         "olmasını şart koşar; okuma, yazma ve silmede aynı şekilde. "
+         "Oyuncuların kayıtları listeleyebileceği bir sorgu yoktur; bu yüzden "
+         "bir kayıttan başka bir kayda ulaşılamaz. Veritabanındaki diğer her "
+         "şey varsayılan olarak reddedilir. Kurallar her dağıtımın parçası "
+         "olarak yayımlanır.")
     + _p("Bulut kopyası bir kolaylıktır. Firebase başlatılamazsa, ağ yoksa ya "
-         "da bir yazma reddedilirse oyun telefonundaki kopyadan devam eder.")
+         "da bir yazma reddedilirse oyun, telefonunuzdaki kopyadan devam "
+         "eder.")
     + "<h2>5. Ölçüm</h2>"
     + _p("Oyun, Firebase Analytics'e kısa bir olay listesi gönderir; hepsi "
-         "seninle değil tahtayla ilgilidir:")
-    + _ul("bir bölüm açıldı, ve bir bölüm bitti: yıldızı, süresi ve kaç "
-          "oturmuş bölgeyi söktüğün;",
-          "bir bölüm çözülmeden bitti: tahtanın hamlesi kalmadığı durum ile "
-          "senin bıraktığın durum ayrı ayrı;",
-          "tahta çıkmaza düştü, ve geriye ne kadar bütçe kaldı;",
+         "sizinle değil, tahtayla ilgilidir:")
+    + _ul("bir bölüm açıldı; bir bölüm bitti: yıldızı, süresi ve kaç oturmuş "
+          "bölgeyi söktüğünüz;",
+          "bir bölüm çözülmeden bitti: tahtada hamle kalmadığı durum ile sizin "
+          "bıraktığınız durum ayrı ayrı;",
+          "tahta çıkmaza girdi ve geriye ne kadar vuruş hakkı kaldı;",
           "oturmuş bir bölge söküldü;",
-          "joker kullanıldı, ve üçünden hangisi olduğu;",
-          "reklam gösterildi, ve bir şey kazandırıp kazandırmadığı;",
+          "bir joker kullanıldı ve üçünden hangisi olduğu;",
+          "bir reklam gösterildi ve ödül kazandırıp kazandırmadığı;",
           "reklamsız sürüm satın alındı;",
-          "hesap bağlandı, ve Google mı Apple mı olduğu.")
-    + _p("Ölçüm rızası ilk olay gönderilmeden önce kodda daraltılır: reklam "
+          "bir hesap bağlandı ve Google mı Apple mı olduğu.")
+    + _p("Ölçüm rızası, ilk olay gönderilmeden önce kodda daraltılır: reklam "
          "depolaması, reklam kişiselleştirme sinyalleri ve reklam kullanıcı "
          "verisi reddedilmiş olarak ayarlanır, yalnızca ölçüm depolamasına "
-         "izin verilir. Anonim kimlik Analytics'e verilmez; yani bu olaylar "
-         "bir profil olarak değil, toplam olarak birikir. Burada isim, mesaj "
-         "ya da yazdığın bir şeyi taşıyabilecek bir ayrıntı yok, çünkü oyunda "
-         "hiçbir yazı girişi yok.")
+         "izin verilir. Anonim kimliğiniz Analytics'e verilmez; bu olaylar "
+         "bir profil olarak değil, toplam sayılar olarak birikir. Bu "
+         "olaylarda isim, mesaj ya da yazdığınız bir şey bulunamaz, çünkü "
+         "oyunda hiçbir yazı girişi yoktur.")
     + "<h2>6. Çökme raporları</h2>"
-    + _p("Firebase Crashlytics, çökmeleri ve sessiz kalmaması gereken "
+    + _p("Firebase Crashlytics, çökmeleri ve sessizce geçilmemesi gereken "
          "yakalanmış hataları kaydeder: reddedilen bir bulut yazması ya da "
-         "başarısız bir giriş gibi. Bir rapor, yığın izini ve Crashlytics "
+         "başarısız bir giriş gibi. Bir rapor, hata yığınını ve Crashlytics "
          "kitaplığının kendi topladığı cihaz bilgisini içerir: cihaz modeli, "
          "işletim sistemi sürümü ve uygulama sürümü.")
-    + _p("İki şey bilerek ekleniyor. Birincisi o an bulunduğun bölümün "
-         "numarası. İkincisi anonim kimliğin: bir çökmenin hangi bulut "
-         "kaydına denk geldiğini, neyin bozulduğunu ararken eşleştirebilmek "
-         "için. O kimlik rastgele bir dizedir; içinde isim, e-posta ya da "
-         "cihaz kimliği yoktur.")
+    + _p("İki bilgi bilerek eklenir. Birincisi, o sırada bulunduğunuz "
+         "bölümün numarasıdır. İkincisi anonim kimliğinizdir: bir sorunu "
+         "ararken çökmenin hangi bulut kaydına ait olduğunu eşleştirebilmek "
+         "için. Bu kimlik rastgele bir karakter dizisidir; içinde isim, "
+         "e-posta adresi ya da cihaz kimliği yoktur.")
     + "<h2>7. Reklamlar</h2>"
     + _ul("<strong>Bölüm aralarında</strong> (Google AdMob): 11. bölümden "
           "itibaren tam ekran bir reklam çıkabilir; en fazla dört bölümde bir "
-          "ve son reklamdan üç dakika geçmeden değil. Sıfır yıldızla biten bir "
-          "bölümden sonra asla reklam yoktur ve hiçbir yerde banner reklam "
-          "yoktur.",
-          "<strong>İzlemeyi kendin seçtiğin reklamlar</strong>: biri can, "
+          "ve son reklamdan üç dakika geçmeden değil. Sıfır yıldızla biten "
+          "bir bölümden sonra reklam gösterilmez; oyunun hiçbir yerinde "
+          "banner reklam yoktur.",
+          "<strong>İzlemeyi sizin seçtiğiniz reklamlar</strong>: biri can, "
           "diğeri joker kazandırır. İkisi de isteğe bağlıdır, ikisinin de "
-          "günlük tavanı vardır ve izlemezsen hiçbir şey eksilmez.",
-          "<strong>Google'ın aldığı</strong>: reklamı seçmek ve ölçmek için "
-          "cihazın reklam kimliği ve standart istek verisi: yaklaşık bölge, "
-          "cihaz tipi, işletim sistemi sürümü. O kimliği cihaz ayarlarından "
-          "istediğin zaman sıfırlayabilir ya da kapatabilirsin.",
-          "<strong>Rıza</strong>: AEA ve Birleşik Krallık'ta, ve Google'ın "
+          "günlük sınırı vardır ve izlemediğinizde hiçbir şey "
+          "kaybetmezsiniz.",
+          "<strong>Google'ın aldıkları</strong>: reklamı seçmek ve ölçmek için "
+          "cihazın reklam kimliği ve standart istek verileri (yaklaşık bölge, "
+          "cihaz tipi, işletim sistemi sürümü). Bu kimliği cihaz "
+          "ayarlarınızdan istediğiniz zaman sıfırlayabilir ya da "
+          "kapatabilirsiniz.",
+          "<strong>Rıza</strong>: AEA'da, Birleşik Krallık'ta ve Google'ın "
           "kurallarının gerektirdiği diğer yerlerde, reklam kitaplığı "
-          "başlatılmadan önce Google'ın rıza formu gösterilir ve cevabın "
-          "cihazda saklanır. İlk cevabına mahkûm değilsin: formun geçerli "
-          "olduğu yerlerde Ayarlar'da formu yeniden açan bir "
-          "<strong>Reklam gizliliği</strong> satırı var. Geçerli olmadığı "
-          "yerlerde satır çizilmiyor, çünkü dokununca hiçbir şey yapmayan bir "
-          "satır, hiç olmamasından kötüdür.",
+          "başlatılmadan önce Google'ın rıza formu gösterilir ve cevabınız "
+          "cihazda saklanır. İlk cevabınızı sonradan değiştirebilirsiniz: "
+          "formun geçerli olduğu yerlerde Ayarlar'da formu yeniden açan bir "
+          "<strong>Reklam gizliliği</strong> satırı vardır. Formun geçerli "
+          "olmadığı yerlerde bu satır gösterilmez.",
           "<strong>App Tracking Transparency</strong> (yalnızca iOS): reklam "
-          "ağından bir şey istenmeden önce iOS, uygulamanın seni başka "
-          "şirketlerin uygulama ve sitelerinde takip edip edemeyeceğini sorar. "
-          "Hayır demek oyunda hiçbir şeyi değiştirmez; yalnızca gördüğün "
-          "reklamlar kişiselleştirilmemiş olur.")
+          "ağından bir şey istenmeden önce iOS, uygulamanın sizi diğer "
+          "şirketlerin uygulama ve web sitelerinde takip edip "
+          "edemeyeceğini sorar. Hayır demek oyunda hiçbir şeyi değiştirmez; "
+          "yalnızca gördüğünüz reklamlar kişiselleştirilmemiş olur.")
     + "<h2>8. Satın alma</h2>"
-    + _p("Tek bir satın alma var, reklamları kaldırıyor ve abonelik değil tek "
-         "seferlik. Google Play ve App Store satıyor: ödeme mağazanın içinde "
-         "olur, kayıtlı satıcı biz değiliz, kart numarası ya da fatura adresi "
-         "bize ulaşmaz. Oyun cihazda bir evet/hayır işareti tutar ve yeni bir "
-         "cihazda mağazadan yeniden doğrulatır.")
-    + "<h2>9. Verini silme</h2>"
-    + _p("Bulut kaydını ve bağlı olduğu kimliği oyunun içinden "
-         "silebilirsin; telefonundaki kopyayı da ayrıca temizleyebilirsin. "
-         "İkisinin adımları ve hangisinin neyi kapsamadığı "
+    + _p("Tek bir satın alma vardır: reklamları kaldırır ve abonelik değil, "
+         "tek seferliktir. Satışı Google Play ve App Store yapar: ödeme "
+         "mağazanın içinde gerçekleşir, kayıtlı satıcı biz değiliz ve kart "
+         "numaranız ya da fatura adresiniz bize ulaşmaz. Oyun cihazda bir "
+         "evet/hayır işareti tutar ve yeni bir cihazda bunu mağazaya yeniden "
+         "doğrulatır.")
+    + "<h2>9. Verilerinizi silme</h2>"
+    + _p("Bulut kaydınızı ve bağlı olduğu kimliği oyunun içinden silebilir, "
+         "telefonunuzdaki kopyayı da ayrıca temizleyebilirsiniz. Her ikisinin "
+         "adımları ve hangisinin neyi kapsamadığı "
          "<a href=\"/tr/account-deletion.html\">Hesap silme</a> sayfasında "
-         "yazıyor.")
+         "yazılıdır.")
     + "<h2>10. Çocuklar</h2>"
-    + _p("%s'da sohbet ve kullanıcı içeriği yoktur, oyunun hiçbir yerinde bir "
-         "şey yazılabilecek bir alan yoktur. Çocuklara yönelik değildir. "
-         "Oyunda reklam gösterildiği için genel kitleye uygun olarak "
+    + _p("%s'da sohbet ve kullanıcı içeriği yoktur; oyunun hiçbir yerinde bir "
+         "şey yazılabilecek bir alan yoktur. Oyun çocuklara yönelik değildir. "
+         "Reklam gösterdiği için genel kitleye uygun olarak "
          "derecelendirilmiştir, çocuk uygulaması olarak beyan "
          "edilmemiştir." % APP)
     + "<h2>11. Değişiklikler</h2>"
     + _p("Bu sayfadaki önemli değişiklikler yeni bir tarihle burada "
-         "yayımlanır. Oyun bulut kaydı, giriş ve ölçüm kazandığında bu sayfa "
-         "yamalanmadı, yeniden yazıldı; çünkü önceki sürüm bunun tersini "
-         "söylüyordu. Bir dahakinde de aynısı geçerli.")
+         "yayımlanır.")
     + "<h2>12. İletişim</h2>"
     + _p("%s &middot; %s" % (_mail(), PKG)))
 
@@ -451,77 +453,79 @@ TERMS_EN = (
     + _p("%s &middot; %s" % (_mail(), PKG)))
 
 TERMS_TR = (
-    "<h2>1. Kısa hali</h2>"
+    "<h2>1. Kısaca</h2>"
     + "<div class=\"vurgu\">"
-    + _p("%s ücretsiz oynanır. İsteğe bağlı tek bir satın alma var: reklamları "
-         "kaldırmak. Oyna, keyfini çıkar, kırmaya ve yeniden satmaya çalışma."
-         % APP)
+    + _p("%s ücretsiz oynanır. İsteğe bağlı tek bir satın alma vardır: "
+         "reklamları kaldırmak. Oyunu keyifle oynayın; kırmaya ya da yeniden "
+         "satmaya çalışmayın." % APP)
     + "</div>"
     + "<h2>2. Lisans</h2>"
-    + _p("%s, %s'yu kendi kontrolündeki cihazlara kurup oynaman için kişisel, "
-         "münhasır olmayan ve devredilemez bir lisans verir. Oyun, görselleri, "
-         "bölümleri, sesleri ve kodu bize aittir." % (DEV, APP))
-    + "<h2>3. Yapmamayı kabul ettiklerin</h2>"
-    + _ul("Uygulamayı tersine mühendislik yapmak, kaynak koda çevirmek ya da "
-          "değiştirmek (kanunen hariç tutulamayan haller dışında).",
-          "Uygulamayı ya da varlıklarını yeniden dağıtmak, başka bir adla "
+    + _p("%s, %s'yu kendi kontrolünüzdeki cihazlara kurup oynamanız için size "
+         "kişisel, münhasır olmayan ve devredilemez bir lisans verir. Oyun, "
+         "görselleri, bölümleri, sesleri ve kodu bize aittir." % (DEV, APP))
+    + "<h2>3. Yapmamayı kabul ettikleriniz</h2>"
+    + _ul("Uygulamayı tersine mühendislikle incelemek, kaynak koda çevirmek "
+          "ya da değiştirmek (kanunen hariç tutulamayan haller dışında).",
+          "Uygulamayı ya da varlıklarını yeniden dağıtmak veya başka bir adla "
           "yayımlamak.",
           "Oyunun cihazda tuttuğu kayda, bulut kaydına ya da mağazanın satın "
           "alma doğrulamasına müdahale etmek.",
-          "Başka bir oyuncunun hesabını kullanmak ya da sana ait olmayan bir "
+          "Başka bir oyuncunun hesabını kullanmak ya da size ait olmayan bir "
           "kayda ulaşmaya çalışmak.")
-    + "<h2>4. Hesabın</h2>"
-    + _p("Oyun ilk açılışta sana anonim bir kimlik verir ve bulut kaydını onun "
-         "altına yazar. Google ya da Apple hesabı bağlamak isteğe bağlıdır ve "
-         "oyunu başka bir cihazda sürdürebilmen için vardır. Bağladığın "
-         "hesaba erişimini korumak senin sorumluluğundadır; onsuz bir kaydı "
-         "tanımlayamayız.")
-    + _p("Hesabı ve bulut kaydını oyunun içinden istediğin zaman "
-         "silebilirsin. Bkz. <a href=\"/tr/account-deletion.html\">Hesap "
+    + "<h2>4. Hesabınız</h2>"
+    + _p("Oyun ilk açılışta size anonim bir kimlik verir ve bulut kaydınızı "
+         "onun altına yazar. Google ya da Apple hesabı bağlamak isteğe "
+         "bağlıdır ve oyuna başka bir cihazda devam edebilmeniz için vardır. "
+         "Bağladığınız hesaba erişiminizi korumak sizin sorumluluğunuzdadır; "
+         "o hesap olmadan bir kaydı tanımlayamayız.")
+    + _p("Hesabınızı ve bulut kaydınızı oyunun içinden istediğiniz zaman "
+         "silebilirsiniz. Bkz. <a href=\"/tr/account-deletion.html\">Hesap "
          "silme</a>.")
     + "<h2>5. İlerleme ve bulut kaydı</h2>"
-    + _p("Oyunun oynadığı kopya cihazındakidir. Bulut kopyası onun üstüne "
-         "konmuş bir kolaylıktır; telefon değişince ilerlemenin hayatta "
-         "kalması içindir. Ağ yoksa, hizmet erişilemezse ya da hiç hesap "
-         "bağlamadıysan oyun cihazdan devam eder ve hiçbir şeyi bozulmaz.")
-    + _p("Bunun sonucu olarak bazı şeyler cihazlar arasında taşınmaz: canlar "
-         "ve sayacı, bir de günlük ödüllü reklam hakları, onları kazanan "
-         "cihazda kalır. Aynı kayıt iki cihazda değişmişse oyun bölümler, "
-         "yıldızlar ve ömür boyu sayaçlar için yüksek olanı tutar; joker "
-         "sayıları ve ayarlar için en son yazanın değerlerini alır. "
-         "Çevrimdışıyken kazanılan ve sonra bu karşılaştırmayı kaybeden bir "
+    + _p("Oyun, cihazınızdaki kopyadan oynar. Bulut kopyası onun üstüne "
+         "eklenmiş bir kolaylıktır; telefon değiştirdiğinizde ilerlemeniz "
+         "kaybolmasın diye vardır. Ağ yoksa, hizmete erişilemiyorsa ya da hiç "
+         "hesap bağlamadıysanız oyun cihazdan devam eder ve hiçbir işlevi "
+         "bozulmaz.")
+    + _p("Bu nedenle bazı şeyler cihazlar arasında taşınmaz: canlar ve "
+         "sayacı ile günlük ödüllü reklam hakları, onları kazanan cihazda "
+         "kalır. Aynı kayıt iki cihazda değiştirilmişse oyun bölümler, "
+         "yıldızlar ve toplam sayaçlar için yüksek olanı tutar; joker "
+         "sayıları ve ayarlar için en son yazan cihazın değerlerini alır. "
+         "Çevrimdışıyken kaydedilen ve sonra bu karşılaştırmayı kaybeden bir "
          "ilerleme kaybolabilir. Bir bulut kaydının her koşulda geri "
-         "getirilebileceğine dair söz vermiyoruz.")
+         "getirilebileceğini taahhüt etmiyoruz.")
     + "<h2>6. Satın alma</h2>"
     + _ul("Reklamsız sürüm tek seferlik bir satın almadır, abonelik değildir. "
-          "Satın aldığın mağaza hesabına bağlıdır ve yeni bir cihazda aynı "
+          "Satın aldığınız mağaza hesabına bağlıdır ve yeni bir cihazda aynı "
           "hesaptan geri yüklenebilir.",
-          "Oyunun içinde bağlamış olabileceğin Google ya da Apple hesabına "
-          "bağlı değildir ve bulut kaydının parçası değildir. Oyunda hesabını "
-          "silmek satın almanı elinden almaz.",
+          "Oyunun içinde bağlamış olabileceğiniz Google ya da Apple hesabına "
+          "bağlı değildir ve bulut kaydının parçası değildir. Oyunda "
+          "hesabınızı silmek satın almanızı ortadan kaldırmaz.",
           "Ödeme, vergi ve faturalama Google Play ya da App Store tarafından "
-          "yürütülür. Kayıtlı satıcı biz değiliz ve ödeme bilgilerini hiç "
-          "almayız.",
-          "İade, satın aldığın mağazanın politikasına tabidir. İadeyi biz "
-          "veremeyiz ama bize yazarsan nereye başvuracağını söyleriz.",
+          "yürütülür. Kayıtlı satıcı biz değiliz ve ödeme bilgilerinizi "
+          "hiçbir zaman almayız.",
+          "İadeler, satın aldığınız mağazanın politikasına tabidir. İadeyi "
+          "biz yapamayız; ancak bize yazarsanız nereye başvurmanız "
+          "gerektiğini söyleriz.",
           "Canlar, yıldızlar, jokerler ve vuruş bütçesi para birimi değildir. "
           "Satın alınamaz, satılamaz, devredilemez ve oyunun dışında bir "
           "değerleri yoktur.")
-    + "<h2>7. Erişilebilirlik ve değişiklikler</h2>"
+    + "<h2>7. Kullanılabilirlik ve değişiklikler</h2>"
     + _p("Oyun değişebilir. Bölümler yeniden dengelenebilir, özellikler "
-         "eklenebilir ya da kaldırılabilir. Burada hiçbir özelliğin sonsuza "
-         "kadar var olacağı vaat edilmiyor, bulut kaydı da buna dahil. "
-         "Halihazırda yaptığın bir satın alma böyle bir değişiklikle elinden "
+         "eklenebilir ya da kaldırılabilir. Burada hiçbir özelliğin, bulut "
+         "kaydı dahil, sonsuza kadar var olacağı vaat edilmez. Önceden "
+         "yaptığınız bir satın alma böyle bir değişiklik nedeniyle elinizden "
          "alınmaz.")
     + "<h2>8. Garanti yok</h2>"
-    + _p("%s olduğu gibi sunulur. Kanunun izin verdiği ölçüde, kesintisiz ya da "
-         "hatasız çalışacağına dair bir garanti vermiyoruz ve kullanımından "
-         "doğan dolaylı zararlardan, kaybolan ilerleme dahil, sorumlu "
-         "değiliz." % APP)
+    + _p("%s olduğu gibi sunulur. Kanunun izin verdiği ölçüde, kesintisiz ya "
+         "da hatasız çalışacağına dair bir garanti vermiyoruz ve "
+         "kullanımından doğan dolaylı zararlardan, kaybolan ilerleme dahil, "
+         "sorumlu değiliz." % APP)
     + "<h2>9. Uygulanacak hukuk</h2>"
-    + _p("Bu koşullar Türkiye Cumhuriyeti kanunlarına tabidir. Buradaki hiçbir "
-         "hüküm, yaşadığın ülkenin kanunlarından doğan tüketici haklarını "
-         "sınırlamaz.")
+    + _p("Bu koşullar Türkiye Cumhuriyeti kanunlarına tabidir. Buradaki "
+         "hiçbir hüküm, yaşadığınız ülkenin kanunlarından doğan tüketici "
+         "haklarınızı sınırlamaz.")
     + "<h2>10. İletişim</h2>"
     + _p("%s &middot; %s" % (_mail(), PKG)))
 
@@ -549,18 +553,17 @@ DELETE_EN = (
           "The confirmation reads <em>Your account and its cloud save will be "
           "deleted. Progress on this device stays.</em> Tap "
           "<strong>Delete account</strong> again to confirm.")
-    + _p("The game deletes the document at <strong>/users/{your "
-         "identity}</strong> first, then deletes the authentication record "
-         "itself, then signs you in with a fresh anonymous identity so you can "
-         "keep playing. If a step fails, the settings screen says so instead "
-         "of pretending it worked; try again, and write to us if it keeps "
+    + _p("Your cloud save and account are deleted from our servers: the save "
+         "first, then the authentication record itself. The game then gives you a "
+         "fresh anonymous identity so you can keep playing. If a step fails, "
+         "the settings screen says so; try again, and write to us if it keeps "
          "failing.")
     + _p("<strong>This works whether or not you ever signed in.</strong> An "
-         "anonymous identity is an account too: it has a document in the "
-         "cloud, so it has something to delete. Making you create an account "
-         "before you are allowed to delete one would mean handing us more "
-         "about yourself in order to get rid of what we already hold, so the "
-         "row is there from the start. The <strong>Account</strong> section "
+         "anonymous identity is an account too: it has a save in the cloud, "
+         "so it has something to delete. Making you create an account before "
+         "you are allowed to delete one would mean handing us more about "
+         "yourself in order to delete what we already hold, so the row is "
+         "there from the start. The <strong>Account</strong> section "
          "appears as soon as the cloud is running; if the game cannot reach "
          "it, the section is not drawn at all and there is nothing stored on "
          "our side to remove.")
@@ -574,9 +577,9 @@ DELETE_EN = (
     + _p("This clears the levels you cleared, your stars, the lifetime "
          "counters and the record of which lessons you were taught. The next "
          "time the game syncs, it writes that cleared state over your cloud "
-         "document, so the progress in the cloud copy goes too.")
+         "save, so the progress in the cloud copy goes too.")
     + _p("<strong>What it does not do</strong>: it does not delete the cloud "
-         "document or the identity, and it leaves your jokers, settings, "
+         "save or the identity, and it leaves your jokers, settings, "
          "lives and ad-free purchase alone. To remove the record itself, use "
          "step 1.")
     + "<h2>3. Ask us by e-mail</h2>"
@@ -591,9 +594,8 @@ DELETE_EN = (
          "identify your save and the in-app routes above are the only ones "
          "that work.")
     + "<h2>What is deleted, and what is not</h2>"
-    + _ul("<strong>Deleted</strong>: the document at /users/{your identity} "
-          "with everything listed in the "
-          "<a href=\"/privacy.html\">privacy policy</a>, and the "
+    + _ul("<strong>Deleted</strong>: your cloud save with everything listed "
+          "in the <a href=\"/privacy.html\">privacy policy</a>, and the "
           "authentication record for that identity.",
           "<strong>Kept, at the store</strong>: if you bought the ad-free "
           "version, that receipt belongs to Google Play or the App Store. We "
@@ -613,90 +615,94 @@ DELETE_EN = (
           "any time.")
     + "<h2>Uninstalling</h2>"
     + _p("Uninstalling removes the copy on the phone, including the anonymous "
-         "session that identifies you. It does not delete the cloud document, "
+         "session that identifies you. It does not delete the cloud save, "
          "and afterwards there is no way to reach it. If you want the cloud "
          "copy gone, do step 1 before you uninstall.")
     + "<h2>Contact</h2>"
     + _p("%s &middot; %s" % (_mail(), PKG)))
 
 DELETE_TR = (
-    "<h2>%s'da hesap ne demek</h2>" % APP
+    "<h2>%s'da hesap nedir</h2>" % APP
     + "<div class=\"vurgu\">"
-    + _p("Oyun ilk açılışta, senden hiçbir şey istemeden bir "
-         "<strong>anonim kimlik</strong> verir ve bulut kaydını onun altına "
+    + _p("Oyun ilk açılışta, sizden hiçbir şey istemeden bir "
+         "<strong>anonim kimlik</strong> verir ve bulut kaydınızı onun altına "
          "yazar. <strong>Google</strong> ya da <strong>Apple</strong> hesabı "
-         "bağlamak isteğe bağlıdır; o kimliği zaten sahip olduğun bir girişe "
-         "iliştirir, böylece kayıt seninle başka bir cihaza gelebilir.")
+         "bağlamak isteğe bağlıdır; bu kimliği zaten sahip olduğunuz bir "
+         "girişe bağlar, böylece kaydınız sizinle başka bir cihaza "
+         "taşınabilir.")
     + "</div>"
-    + "<h2>1. Hesabını ve bulut kaydını sil</h2>"
+    + "<h2>1. Hesabınızı ve bulut kaydınızı silin</h2>"
     + _p("Bizim tarafımızdaki kaydı silen yol budur.")
-    + _ol("Oyunda <strong>Ayarlar</strong>'ı aç.",
-          "Aşağı kaydırıp <strong>Hesap</strong> bölümüne gel.",
-          "<strong>Hesabı sil</strong> satırına dokun.",
-          "Onay ekranında şu yazar: <em>Hesabın ve buluttaki kaydın "
+    + _ol("Oyunda <strong>Ayarlar</strong>'ı açın.",
+          "Aşağı kaydırıp <strong>Hesap</strong> bölümüne gelin.",
+          "<strong>Hesabı sil</strong> satırına dokunun.",
+          "Onay penceresinde şu yazar: <em>Hesabın ve buluttaki kaydın "
           "silinecek. Bu cihazdaki ilerlemen kalır.</em> Onaylamak için "
-          "yeniden <strong>Hesabı sil</strong>'e dokun.")
-    + _p("Oyun önce <strong>/users/{kimliğin}</strong> yolundaki belgeyi "
-         "siler, sonra kimlik kaydının kendisini siler, sonra oynamaya devam "
-         "edebilesin diye seni yeni bir anonim kimlikle içeri alır. Bir adım "
-         "başarısız olursa ayarlar ekranı bunu söyler, olmuş gibi yapmaz; "
-         "tekrar dene, olmuyorsa bize yaz.")
-    + _p("<strong>Bu yol, hiç giriş yapmamış olsan da çalışır.</strong> Anonim "
-         "kimlik de bir hesaptır: bulutta bir belgesi vardır, yani silinecek "
-         "bir şey vardır. Bir hesabı silebilmen için önce hesap açmanı "
-         "istemek, elimizde olandan kurtulmak uğruna senden daha fazla bilgi "
-         "istemek olurdu; o yüzden satır en baştan orada. "
-         "<strong>Hesap</strong> bölümü bulut çalışır çalışmaz görünür; oyun "
-         "buluta erişemiyorsa bölüm hiç çizilmez ve bizim tarafımızda "
-         "silinecek bir şey de yoktur.")
-    + "<h2>2. Bu cihazdaki ilerlemeni temizle</h2>"
-    + _ol("Oyunda <strong>Ayarlar</strong>'ı aç.",
-          "Aşağı kaydırıp <strong>Veriler</strong> bölümüne gel.",
-          "<strong>İlerlemeyi sıfırla</strong> satırına dokun.",
-          "Onay ekranında şu yazar: <em>Tüm bölümler ve yıldızlar silinecek. "
-          "Emin misin?</em> Onaylamak için yeniden <strong>İlerlemeyi "
-          "sıfırla</strong>'ya dokun.")
-    + _p("Bu, geçtiğin bölümleri, yıldızlarını, ömür boyu sayaçları ve hangi "
-         "dersleri öğrendiğinin kaydını temizler. Oyun bir sonraki "
-         "eşitlemesinde bu temiz durumu bulut belgenin üzerine yazar; yani "
-         "bulut kopyasındaki ilerleme de gider.")
-    + _p("<strong>Yapmadığı şey</strong>: bulut belgesini ya da kimliği "
-         "silmez, jokerlerine, ayarlarına, canlarına ve reklamsız satın "
-         "almana dokunmaz. Kaydın kendisini kaldırmak için 1. adımı kullan.")
-    + "<h2>3. E-posta ile bize sor</h2>"
-    + _p("%s adresine, Google ya da Apple hesabına bağlı adresten, "
-         "<strong>%s silme talebi</strong> konusuyla yaz. Doğru kaydı "
-         "bulmamızı sağlayan şey o adrestir; aynı adrese cevap veririz ve "
-         "istersen yazışmayı da onunla birlikte sileriz." % (_mail(), APP))
+          "yeniden <strong>Hesabı sil</strong>'e dokunun.")
+    + _p("Bulut kaydınız ve hesabınız sunucularımızdan silinir: önce kayıt, "
+         "sonra kimlik kaydının kendisi. Ardından oyun, oynamaya devam "
+         "edebilmeniz için size yeni bir anonim kimlik verir. Bir adım "
+         "başarısız olursa ayarlar ekranı bunu bildirir; yeniden deneyin, "
+         "sorun sürerse bize yazın.")
+    + _p("<strong>Bu yol, hiç giriş yapmamış olsanız da çalışır.</strong> "
+         "Anonim kimlik de bir hesaptır: bulutta bir kaydı vardır, yani "
+         "silinecek bir şey vardır. Hesabınızı silebilmeniz için önce hesap "
+         "açmanızı istemek, elimizdeki veriyi silmek için sizden daha fazla "
+         "bilgi istemek olurdu; bu yüzden satır baştan beri oradadır. "
+         "<strong>Hesap</strong> bölümü bulut bağlantısı kurulur kurulmaz "
+         "görünür; oyun buluta erişemiyorsa bölüm hiç gösterilmez ve bizim "
+         "tarafımızda silinecek bir şey de yoktur.")
+    + "<h2>2. Bu cihazdaki ilerlemenizi temizleyin</h2>"
+    + _ol("Oyunda <strong>Ayarlar</strong>'ı açın.",
+          "Aşağı kaydırıp <strong>Veriler</strong> bölümüne gelin.",
+          "<strong>İlerlemeyi sıfırla</strong> satırına dokunun.",
+          "Onay penceresinde şu yazar: <em>Tüm bölümler ve yıldızlar "
+          "silinecek. Emin misin?</em> Onaylamak için yeniden "
+          "<strong>İlerlemeyi sıfırla</strong>'ya dokunun.")
+    + _p("Bu işlem geçtiğiniz bölümleri, yıldızlarınızı, toplam sayaçları ve "
+         "hangi dersleri öğrendiğinizin kaydını temizler. Oyun bir sonraki "
+         "eşitlemede bu temiz durumu bulut kaydınızın üzerine yazar; yani "
+         "bulut kopyasındaki ilerleme de silinir.")
+    + _p("<strong>Yapmadığı şey</strong>: bulut kaydını ya da kimliği "
+         "silmez; jokerlerinize, ayarlarınıza, canlarınıza ve reklamsız "
+         "satın almanıza dokunmaz. Kaydın kendisini silmek için 1. yolu "
+         "kullanın.")
+    + "<h2>3. E-postayla bize başvurun</h2>"
+    + _p("Google ya da Apple hesabınıza bağlı adresten %s adresine "
+         "<strong>%s silme talebi</strong> konusuyla yazın. Doğru kaydı "
+         "bulmamızı sağlayan şey bu adrestir; aynı adrese cevap veririz ve "
+         "isterseniz yazışmayı da kayıtla birlikte sileriz." % (_mail(), APP))
     + _p("Anonim bir kayıtta e-posta adresi, isim ya da bir mesajla "
-         "eşleştirilebilecek başka bir şey yoktur; zaten bu kadar az şey "
-         "tutmasının sebebi de budur. Hiç hesap bağlamadıysan bir e-posta "
-         "kaydını tanımlayamaz ve yukarıdaki uygulama içi yollar tek "
+         "eşleştirilebilecek başka bir bilgi yoktur; zaten bu kadar az veri "
+         "tutmasının sebebi de budur. Hiç hesap bağlamadıysanız bir e-posta "
+         "kaydınızı tanımlayamaz ve yukarıdaki uygulama içi yollar tek "
          "çalışan yollardır.")
-    + "<h2>Neler siliniyor, neler silinmiyor</h2>"
-    + _ul("<strong>Silinen</strong>: /users/{kimliğin} yolundaki belge, "
+    + "<h2>Neler silinir, neler silinmez</h2>"
+    + _ul("<strong>Silinen</strong>: "
           "<a href=\"/tr/privacy.html\">gizlilik politikasında</a> sayılan her "
-          "şeyle birlikte, ve o kimliğin kimlik doğrulama kaydı.",
-          "<strong>Mağazada kalan</strong>: reklamsız sürümü aldıysan o makbuz "
-          "Google Play'e ya da App Store'a aittir. Bizim erişimimiz yok ve "
-          "orada silmek satın almayı geri yükleme hakkını da ortadan "
-          "kaldırır. Burada hesabını silmek satın almanı elinden almaz.",
-          "<strong>Toplam olarak kalan</strong>: gizlilik politikasında "
-          "anlatılan ölçüm olayları kimliğin iliştirilmeden gelir; yani "
+          "şeyle birlikte bulut kaydınız ve o kimliğin kimlik doğrulama "
+          "kaydı.",
+          "<strong>Mağazada kalan</strong>: reklamsız sürümü satın aldıysanız "
+          "o makbuz Google Play'e ya da App Store'a aittir. Bizim ona "
+          "erişimimiz yoktur ve orada silinmesi, satın almayı geri yükleme "
+          "hakkınızı da ortadan kaldırır. Burada hesabınızı silmek satın "
+          "almanızı ortadan kaldırmaz.",
+          "<strong>Toplam sayı olarak kalan</strong>: gizlilik politikasında "
+          "anlatılan ölçüm olayları kimliğiniz eklenmeden gelir; yani "
           "içlerinde sonradan ayıklanıp silinebilecek bir şey yoktur.",
-          "<strong>Gönderilmiş çökme raporları</strong>: bunlar kimlik "
-          "dizesini taşır ve Firebase Crashlytics'in kendi takvimine göre "
-          "düşer. Kimlik doğrulama kaydı silindikten sonra o dize bizim "
-          "hiçbir şeyimizi işaret etmez.",
+          "<strong>Önceden gönderilmiş çökme raporları</strong>: bunlar "
+          "kimlik dizesini taşır ve Firebase Crashlytics'in kendi saklama "
+          "süresi dolunca silinir. Kimlik doğrulama kaydı silindikten sonra "
+          "bu dize bizde hiçbir şeye karşılık gelmez.",
           "<strong>Reklam ağının aldıkları</strong>: Google'ın reklam "
-          "kimliğini nasıl işlediği kendi dokümantasyonuna tabidir. O kimliği "
-          "cihaz ayarlarından istediğin zaman sıfırlayabilir ya da "
-          "kapatabilirsin.")
+          "kimliğini nasıl işlediği kendi belgelerinde anlatılır. Bu kimliği "
+          "cihaz ayarlarınızdan istediğiniz zaman sıfırlayabilir ya da "
+          "kapatabilirsiniz.")
     + "<h2>Uygulamayı kaldırmak</h2>"
-    + _p("Kaldırmak telefondaki kopyayı, seni tanımlayan anonim oturum dahil, "
-         "siler. Bulut belgesini silmez ve sonrasında o belgeye ulaşmanın bir "
-         "yolu kalmaz. Bulut kopyasının gitmesini istiyorsan kaldırmadan önce "
-         "1. adımı yap.")
+    + _p("Uygulamayı kaldırmak, sizi tanımlayan anonim oturum dahil "
+         "telefondaki kopyayı siler. Bulut kaydını silmez ve sonrasında o "
+         "kayda ulaşmanın bir yolu kalmaz. Bulut kopyasının da silinmesini "
+         "istiyorsanız uygulamayı kaldırmadan önce 1. yolu uygulayın.")
     + "<h2>İletişim</h2>"
     + _p("%s &middot; %s" % (_mail(), PKG)))
 
@@ -716,25 +722,24 @@ _PAGES = {
          "what the cloud save does and does not promise.",
          TERMS_EN),
         ("account-deletion.html", "Account deletion",
-         "Numbered steps to delete your %s account and cloud save from inside "
-         "the game, to clear progress on the device, and what is kept "
-         "afterwards." % APP,
+         "How to delete your %s account and cloud save, how to clear "
+         "progress on your device, and what is kept afterwards." % APP,
          DELETE_EN),
     ],
     "tr": [
         ("privacy.html", "Gizlilik politikası",
-         "%s'nın cihazında ne sakladığı, bulut kaydına ne gittiği, hangi "
+         "%s'nun cihazınızda ne sakladığı, bulut kaydına ne gittiği, hangi "
          "olayları ölçtüğü ve reklamların ne aldığı. Varsayılan olarak "
          "anonim, giriş isteğe bağlı." % APP,
          PRIVACY_TR),
         ("terms.html", "Kullanım koşulları",
-         "Lisans, isteğe bağlı tek satın alma, anonim hesabın ve bulut "
+         "Lisans, isteğe bağlı tek satın alma, anonim hesabınız ve bulut "
          "kaydının neyi vaat edip neyi etmediği.",
          TERMS_TR),
         ("account-deletion.html", "Hesap silme",
-         "%s hesabını ve bulut kaydını oyunun içinden silmek, cihazdaki "
-         "ilerlemeyi temizlemek için numaralı adımlar, ve sonrasında neyin "
-         "kaldığı." % APP,
+         "%s hesabınızı ve bulut kaydınızı nasıl silebileceğiniz, "
+         "cihazdaki ilerlemeyi nasıl temizleyebileceğiniz ve sonrasında "
+         "neyin kaldığı." % APP,
          DELETE_TR),
     ],
 }

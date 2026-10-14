@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Palmo",
   "short_name": "Palmo",
-  "description": "A quiet puzzle. The number on a seed is how many cells its region holds; grow every region to its own size until the board is covered. Free on Android and iOS.",
+  "description": "A number puzzle about regions: each numbered square starts a patch that takes exactly as many cells as its number. Free on Android and iOS.",
   "lang": "en",
   "start_url": "/",
   "scope": "/",

@@ -23,6 +23,8 @@ gider. Uretilen dosyalar: `index.html`, `tr|de|es|fr|pt/index.html`,
 
 - Acilis sayfasi alti dilde: **en (kok)**, tr, de, es, fr, pt. Sira ve dil
   adlari oyundaki `lib/l10n/strings.dart` icindeki `localeNames` ile ayni.
+  Portekizce metin Brezilya Portekizcesi: `lang` ve `hreflang` `pt-BR`, yol
+  `/pt/`.
 - Yasal sayfalar yalnizca Ingilizce ve Turkce. Yarim cevrilmis bir sozlesme
   cevrilmemis olandan kotudur; diger dillerin altbilgisi Ingilizceye gider ve
   dil cubugu o sayfalarda yalnizca iki dil gosterir.
@@ -45,7 +47,8 @@ Bunlar uretilmiyor, repoda elle duruyor:
 |---|---|
 | `CNAME` | Bir kez, asagida |
 | `app-ads.txt` | AdMob hesabi acilinca ve AdMob listesi degistikce |
-| `assets/palmo-mark.svg`, `assets/palmo-lockup-h.svg` | Marka degisirse |
+| `assets/palmo-mark.svg`, `assets/palmo-lockup-h.svg` | Marka degisirse (`tools/outline-svg.py`) |
+| `assets/fonts/*.woff2` | Yazi tipi ya da karakter kumesi degisirse (`tools/build-fonts.py`) |
 | `assets/shots/*.webp` | Ekran goruntuleri cekilince (`assets/shots/README.md`) |
 | `assets/palmo-share.png` | Feature graphic hazir olunca |
 
@@ -90,27 +93,48 @@ Eksik gorsel **yalan soyletmiyor**. `build.py` diski kontrol ediyor:
 
 Hangi karenin ne olmasi gerektigi: `assets/shots/README.md`.
 
-## Marka isareti ve bir borc
+## Marka isareti
 
 `assets/palmo-mark.svg` (favicon, manifest) ve `assets/palmo-lockup-h.svg`
-(ustteki yatay kilit) `design-r3/assets/` altindan kopyalandi; geometri ayni,
-yalnizca `<title>`/`<desc>` kisaltildi ve font yiginina yedek eklendi.
+(ustteki yatay kilit) `design-r3/assets/` altindan kopyalandi; geometri ayni.
 
-**Borc: harfler hala `<text>`.** `<img>` icindeki bir SVG belgenin yazi
-tiplerine ulasamaz, o yuzden kilit ve isaret sayfaya **gomulu** olarak
-yaziliyor (`build.py` icindeki `inline_svg`) ve Nunito 900 boylece uygulaniyor.
-Favicon ise dosyadan okundugu icin Nunito'suz bir makinede sistem yazi tipiyle
-cizilir. Kalici cozum harfleri outline'a cevirmek; o gun `inline_svg` durur,
-yalnizca dosyalar degisir. `design-r3/assets/palmo-mark.svg` dosyasinin kendi
-notu da bunu soyluyor.
+**Harfler kontur (14 Ekim 2026).** Eskiden `<text>` idiler ve sayfanin metni
+"4 P P a a l l m m o o" oluyordu: her harf golge + renk olarak iki kez, ustune
+tohumdaki 4. Arama motoru ve metin cikaran her arac bunu goruyordu.
+`tools/outline-svg.py` harfleri Nunito 900'un kendi konturuna ceviriyor
+(text-anchor ve dominant-baseline tarayici gibi hesaplanir); SVG'de okunacak
+metin kalmadi, erisilebilir ad yalnizca kokteki `role="img"
+aria-label="Palmo"`. Favicon da artik ziyaretcinin sistem fontuna dusmuyor.
+Marka degisirse `design-r3/assets/` altindaki `<text>`'li surum kopyalanip arac
+yeniden kosulur:
+
+```powershell
+python tools/outline-svg.py assets/palmo-lockup-h.svg assets/palmo-mark.svg
+```
+
+Kilit sayfaya hala gomulu (`build.py` `inline_svg`): koyu temada lacivert
+kontur `.kilit [stroke=...]` ile degisiyor ve bu ancak gomulu SVG'de calisir.
 
 ## Yazi tipi
 
-Nunito, Google Fonts CDN'inden. Kabul edilen borc: gizlilik sayfasi tasiyan bir
-site her ziyarette Google'a IP sizdiriyor. Uygulama zaten
-`assets/fonts/Nunito-{Bold,ExtraBold,Black}.ttf` tasiyor; siteye yerel woff2
-koymak hem tutarli hem hizli olur. Dikkat: sitede govde metni icin 400 agirligi
-da isteniyor, uygulamada yalnizca 700/800/900 var.
+Nunito sitenin kendi sunucusundan: `assets/fonts/nunito-{400,700,800,900}.woff2`,
+lisans `assets/fonts/OFL.txt`. Google Fonts baglantisi kaldirildi; sayfa
+baska bir sunucudan hicbir sey yuklemiyor ve altbilgi bunu soyluyor. Dosyalar
+oyun depolarindaki TTF'lerden uretilir (700/800/900 Palmo, 400 Decimo; ayni
+surum 3.602), internetten indirilmez. Alt kume Latin + Latin-1 + Latin
+Extended-A, Turkce harfleri arac kendisi kontrol ediyor:
+
+```powershell
+python tools/build-fonts.py
+```
+
+## E-posta adresleri ve Cloudflare
+
+Site Cloudflare arkasinda ve E-posta Adresi Gizleme acik: isaretsiz bir adres
+`/cdn-cgi/l/email-protection#...` baglantisina cevrilir, JavaScript kapaliyken
+404 verir. Her adres `<!--email_off-->...<!--/email_off-->` icinde
+(`build.py` `mail_link`, `legal_text.py` `_mail`). Yeni adres yazarken bu
+ikisinden birini kullan.
 
 ## Iki kural
 
@@ -123,19 +147,15 @@ sitesi `3px 3px` kullaniyordu, Palmo kullanmaz.
 
 ## Yasal metin gercege bagli
 
-`legal_text.py` Colmo'dan **kopyalanmadi**, cunku Palmo baska bir urun: Firebase
-yok, bulut kaydi yok, hesap yok, analitik ve cokme raporu SDK'si yok; buna
-karsilik `in_app_purchase` (reklamsiz surum) ve `app_tracking_transparency`
-(iOS izin akisi) var. Metin `lib/state/economy.dart` (can, 11. bolum esigi,
-gunde 3 odullu reklam, `noAds`), `lib/state/progress.dart`,
-`lib/state/settings.dart` ve `lib/l10n/strings.dart` (`reset_progress`)
-uzerinden yazildi.
+`legal_text.py` Colmo'dan **kopyalanmadi**. 30 Agustos 2026'dan beri metin
+oyunun bulut kaydini, istege bagli Google/Apple girisini, Firebase Analytics,
+Crashlytics, AdMob ve reklamsiz surum satin almasini anlatiyor; hangi
+cumlenin hangi kaynak dosyadan dogrulandigi `legal_text.py` dosyasinin
+basindaki listede. (Bu bolum eskiden "Firebase yok, bulut kaydi yok" diyordu;
+o urun artik yok.)
 
-**Yayindan once dogrulanacak:** reklam ve satin alma kodu su an uygulamada
-yazili degil (`google_mobile_ads` ve `in_app_purchase` pubspec'te, `lib/`
-altinda kullanan dosya yok). Metin `economy.dart` icindeki karara gore yazildi.
-Magazaya gonderilen surumde gercek yerlesim farkliysa metin once duzelir, sonra
-gonderilir.
+Turkce yasal metin "siz" ile yaziliyor (uc oyunun yasal metni ayni hitapla);
+acilis sayfalari "sen".
 
 Tarihler sayfa basina: `config.py` icindeki `UPDATED` sozlugu. Bir sayfa
 degisince yalnizca onun tarihi elle yukseltilir.

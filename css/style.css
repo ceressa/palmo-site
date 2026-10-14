@@ -11,6 +11,26 @@
  *      kullaniyordu; Palmo'nun elevation.css'i yan ofseti acikca reddediyor.)
  */
 
+/* Nunito sitenin kendi sunucusundan (assets/fonts, tools/build-fonts.py).
+   Eskiden fonts.googleapis.com'dan geliyordu ve her ziyaret IP'yi Google'a
+   veriyordu. Lisans: assets/fonts/OFL.txt. */
+@font-face {
+  font-family: Nunito; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(/assets/fonts/nunito-400.woff2) format("woff2");
+}
+@font-face {
+  font-family: Nunito; font-style: normal; font-weight: 700; font-display: swap;
+  src: url(/assets/fonts/nunito-700.woff2) format("woff2");
+}
+@font-face {
+  font-family: Nunito; font-style: normal; font-weight: 800; font-display: swap;
+  src: url(/assets/fonts/nunito-800.woff2) format("woff2");
+}
+@font-face {
+  font-family: Nunito; font-style: normal; font-weight: 900; font-display: swap;
+  src: url(/assets/fonts/nunito-900.woff2) format("woff2");
+}
+
 :root {
   /* zemin / yuzey / cukur */
   --bg:         #FFF4FB;
@@ -35,7 +55,6 @@
   --r-chrome: 14px;
   --r-card:   20px;
   --r-panel:  28px;
-  --r-pill:   999px;
 
   /* space.css konturlari */
   --s-patch: 3px;
@@ -121,9 +140,30 @@ a { color: var(--pink-dark); }
    birden cok ulkede konusuluyor. */
 .diller { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
 .diller a {
+  position: relative;
   display: inline-block; padding: 4px 9px; border-radius: var(--r-chrome);
   font-size: 13px; font-weight: 800; text-decoration: none;
   color: var(--text-2); border: 2px solid transparent;
+}
+/* Telefonda tam adlar uc satira tasiyordu. 720 pikselin altinda yalnizca kod
+   gorunur; tam ad gorsel olarak gizlenir ama DOM'da kalir, ekran okuyucu onu
+   okur (kod aria-hidden). Cubuk tek satir: nowrap. */
+.dil-kod { display: none; }
+@media (max-width: 720px) {
+  .ust .kap { gap: 10px; }
+  .diller { gap: 2px; flex-wrap: nowrap; }
+  .diller a { padding: 3px 6px; font-size: 12.5px; }
+  .dil-ad {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap; border: 0;
+  }
+  .dil-kod { display: inline; }
+}
+@media (max-width: 400px) { .marka .kilit { height: 28px; } }
+@media (max-width: 350px) {
+  .marka .kilit { height: 24px; }
+  .diller a { padding: 3px 4px; }
 }
 .diller a:hover { color: var(--head); border-color: var(--well-deep); }
 .diller a[aria-current="page"] {
@@ -142,20 +182,8 @@ a { color: var(--pink-dark); }
   .kahraman .kap { grid-template-columns: 1fr; gap: 30px; }
 }
 
-.rozet {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--yellow); color: var(--ink);
-  border: var(--s-patch) solid var(--ink); border-radius: var(--r-pill);
-  box-shadow: var(--lift-chrome);
-  padding: 6px 15px; font-weight: 900; font-size: 14px; letter-spacing: .02em;
-}
-.rozet::before {
-  content: ""; width: 9px; height: 9px; border-radius: 50%;
-  background: var(--ink);
-}
-
 .kahraman h1 {
-  margin: 20px 0 14px;
+  margin: 0 0 14px;
   font-size: clamp(33px, 5.4vw, 52px); line-height: 1.1;
   font-weight: 900; letter-spacing: -.02em; color: var(--head);
 }
@@ -193,6 +221,33 @@ h2 {
   color: var(--head); letter-spacing: -.01em; text-align: center;
 }
 .bolum-alt { text-align: center; color: var(--text-2); margin: 10px auto 30px; max-width: 62ch; }
+.duvar-bolum h2 { margin-bottom: 30px; }
+
+/* ── Nasil oynanir ──────────────────────────────────────────────────── */
+/* Dort adim, numarali. Numara tahtadaki numarali kare gibi: sari kare, kati
+   kontur. Kart kotu asagi, blur yok. */
+.nasil { padding-top: 6px; }
+.adimlar {
+  list-style: none; counter-reset: adim;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
+  max-width: 940px; margin: 28px auto 0;
+}
+@media (max-width: 720px) { .adimlar { grid-template-columns: 1fr; } }
+.adimlar li {
+  counter-increment: adim; position: relative;
+  background: var(--surface); border: var(--s-patch) solid var(--ink);
+  border-radius: var(--r-card); box-shadow: var(--lift-card);
+  padding: 16px 18px 16px 66px; color: var(--text);
+}
+.adimlar li::before {
+  content: counter(adim);
+  position: absolute; left: 16px; top: 15px;
+  width: 34px; height: 34px; display: grid; place-items: center;
+  background: var(--yellow); color: #1B2F4A;
+  border: var(--s-patch) solid var(--ink); border-radius: 10px;
+  font-weight: 900; font-size: 17px; line-height: 1;
+}
+.nasil .bolum-alt { margin: 22px auto 0; font-weight: 800; }
 
 /* Bant: magaza feature graphic'i, tam genislikte. Dosya yoksa build.py bu
    bolumu hic yazmiyor. */
@@ -259,12 +314,16 @@ footer {
 .aile-kardes img { width: 44px; height: 44px; border-radius: 11px; flex: none; }
 .aile-kardes b { display: block; color: var(--head); font-size: 16px; font-weight: 900; line-height: 1.2; }
 .aile-kardes small { display: block; color: var(--text-2); font-size: 13.5px; font-weight: 800; line-height: 1.35; }
-.aile-alt { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; margin-top: 26px; }
-.aile-alt > span { color: var(--text-2); font-size: 13.5px; }
+/* Alt satirlar uc sitede ayni sirada: yasal baglantilar + destek adresi,
+   sonra "Bir Bardino oyunu" ve telif, sonra cerez notu. */
+.aile-alt { margin-top: 26px; }
 @media (prefers-reduced-motion: reduce) { .aile-kardes a { transition: none; } }
-.f-baglantilar { display: flex; gap: 18px; flex-wrap: wrap; }
-.f-baglantilar a { color: var(--head); font-weight: 800; font-size: 15px; text-decoration: none; }
-.f-baglantilar a:hover { color: var(--pink-dark); text-decoration: underline; }
+.f-baglantilar { color: var(--text); font-size: 15px; font-weight: 700; }
+.f-baglantilar a { color: var(--head); font-weight: 800; text-decoration: none; }
+.f-baglantilar a:hover, .f-studyo a:hover { color: var(--pink-dark); text-decoration: underline; }
+.f-ayrac { color: var(--text-2); }
+.f-studyo, .f-not { margin-top: 8px; color: var(--text-2); font-size: 13.5px; }
+.f-studyo a { color: var(--head); font-weight: 800; text-decoration: none; }
 
 /* Klavye ile gezenin nerede oldugu gorunsun. */
 a:focus-visible {

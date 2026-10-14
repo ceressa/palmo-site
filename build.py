@@ -20,7 +20,7 @@ import re
 import struct
 
 from config import (APP, APP_STORE, DEV, DOMAIN, GOOGLE_PLAY, LANGS,
-                    LEGAL_LANGS, LEGAL_PAGES, ROOT_LANG, SITE, UPDATED)
+                    LEGAL_LANGS, LEGAL_PAGES, MAIL, ROOT_LANG, SITE, UPDATED)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -41,30 +41,56 @@ BADGE_H = 48
 
 T = {}
 
+# Kelime secimi oyunun kendisinden. Numarali karelerden baslayan bolgelere oyun
+# "yama" (patch, Flicken, retazo, piece, retalho) diyor; magaza metni de
+# 7 Ekim 2026'dan beri "tohum" yerine bunu kullaniyor. Kurallar magazanin
+# uzun aciklamasindan (android/fastlane/metadata/android/<dil>/
+# full_description.txt) ve motorun kendisinden (lib/engine/game.dart,
+# level.dart). Turkcede "rakam" dogru: tohum degeri 1-9 (level.dart, bolge
+# boyu 9'a kirpiliyor) ve oyunun kendi giris ekrani da "Rakam" diyor.
+#
+# Baslik magazadaki uygulama adi (title.txt); h1 ve giris paragrafi kurali
+# duz cumleyle anlatiyor. Sayi verilmiyor (bolum sayisi degisecek), tek
+# istisna 1. bolumun kendisi: level.dart'ta kurgulu, 3x3 ve ortada tek bir 9.
+
 T["en"] = {
-    "title": "Palmo - Weave the whole board",
-    "desc": "A quiet puzzle. The number on a seed is how many cells its region "
-            "holds; grow every region to its own size until the board is "
-            "covered. Free on Android and iOS.",
-    "badge": "Out now",
-    "h1a": "The number on a seed",
-    "h1b": "is the size of its region.",
-    "lead": "Palmo is a quiet puzzle. Every seed carries a number, and that "
-            "number is how many cells belong to it. Grow each region to "
-            "exactly its own size, until the board is covered and nothing is "
-            "left over.",
-    "small": "Free to play. Works offline.",
+    "title": "Palmo: Number Weave",
+    "desc": "A number puzzle about regions: each numbered square starts a patch "
+            "that takes exactly as many cells as its number. Free on Android "
+            "and iOS.",
+    "h1a": "Each patch takes",
+    "h1b": "as many cells as its number.",
+    "lead": "Every numbered square on the board starts a patch. A 4 takes four "
+            "cells, a 9 takes nine. Close the whole board with patches of the "
+            "right size and the level is done.",
+    "small": "Free. Plays offline.",
+    "howT": "How to play",
+    "how": [
+        "Touch a numbered square, then take neighboring cells one at a time. "
+        "Cells are neighbors edge to edge, never corner to corner.",
+        "The number on the square counts down with every cell. At zero the "
+        "patch settles; a 4 never gets a fifth cell.",
+        "A wall cuts between two cells and no patch crosses it. A stone is "
+        "never taken; the cells around it manage without it.",
+        "To redo a settled patch, hold your finger on it until it comes apart, "
+        "then draw it again. Each redraw uses one of your extra strokes, and "
+        "the strokes left when the board closes become your stars.",
+    ],
+    "howS": "Every board has exactly one solution.",
     "shotsT": "From the game",
-    "shotsS": "Real screenshots, not mock-ups.",
     "caps": ["The board", "A region settling", "The end of a level",
              "The map"],
     "ph": "Screenshot coming",
-    "endT": "Out now.",
-    "endS": "Free on the App Store and Google Play.",
+    "endT": "Start with a single 9.",
+    "endS": "Level 1 is a three-by-three board with one 9 in the middle.",
     "stores": ("Palmo on the App Store", "Palmo on Google Play"),
     "bandAlt": "Palmo",
-    "legal": ("Privacy", "Terms of use", "Account deletion"),
-    "aile_lead": "Palmo is made by Bardino, a small independent studio. If you like it, meet its two siblings:",
+    "legal": ("Privacy policy", "Terms of use", "Account deletion"),
+    "support": "Support",
+    "studio": "A Bardino game",
+    "nocookie": "This site sets no cookies and loads nothing from other "
+                "servers.",
+    "aile_lead": "More from Bardino:",
     "back": "Back to Palmo",
     "upd": "Last updated",
     "e404T": "Nothing here.",
@@ -72,28 +98,41 @@ T["en"] = {
 }
 
 T["tr"] = {
-    "title": "Palmo - Bütün tahtayı doku",
-    "desc": "Sessiz bir bulmaca. Tohumdaki rakam, o bölgenin kaç hücre "
-            "olduğunu söyler; her bölgeyi tam kendi büyüklüğüne kadar büyüt ve "
-            "tahtayı kapat. Android ve iOS'ta ücretsiz.",
-    "badge": "Yayında",
-    "h1a": "Tohumdaki rakam,",
-    "h1b": "o bölgenin büyüklüğüdür.",
-    "lead": "Palmo sessiz bir bulmacadır. Her tohum bir rakam taşır ve o "
-            "rakam, tohuma kaç hücrenin ait olduğudur. Her bölgeyi tam kendi "
-            "büyüklüğüne kadar büyüt; tahta kapanana ve artan hücre kalmayana "
-            "kadar.",
-    "small": "Ücretsiz oynanır. İnternetsiz çalışır.",
+    "title": "Palmo: Sayı Dokuma",
+    "desc": "Bir bölge bulmacası: her numaralı kare bir yama başlatır, yama da "
+            "karedeki rakam kadar hücre alır. Android ve iOS'ta ücretsiz.",
+    "h1a": "Her yama,",
+    "h1b": "rakamı kadar hücre alır.",
+    "lead": "Tahtadaki her numaralı kare bir yama başlatır. 4 yazan kare dört "
+            "hücre alır, 9 yazan dokuz. Bütün tahtayı doğru boydaki yamalarla "
+            "kapatınca bölüm biter.",
+    "small": "Ücretsiz. İnternetsiz oynanır.",
+    "howT": "Nasıl oynanır",
+    "how": [
+        "Numaralı bir kareye dokun, sonra komşu hücreleri tek tek al. "
+        "Komşuluk kenardandır, köşeden değil.",
+        "Karedeki rakam her hücrede bir azalır. Sıfırlanınca yama oturur; "
+        "4'ün beşinci hücresi olmaz.",
+        "Duvar iki hücrenin arasını keser, hiçbir yama oradan geçemez. Taş hiç "
+        "alınmaz; çevresindeki hücreler onsuz idare eder.",
+        "Oturmuş bir yamayı yeniden çizmek için üstüne basılı tut, dağılınca "
+        "baştan çiz. Her yeniden çizim fazla vuruşlarından birini harcar; "
+        "tahta kapandığında kalan vuruşlar yıldızın olur.",
+    ],
+    "howS": "Her tahtanın tek bir doğru çözümü var.",
     "shotsT": "Oyundan kareler",
-    "shotsS": "Hepsi gerçek ekran görüntüsü, temsili değil.",
     "caps": ["Tahta", "Yerine oturan bir bölge", "Bölümün sonu", "Harita"],
     "ph": "Ekran görüntüsü yakında",
-    "endT": "Çıktı.",
-    "endS": "App Store ve Google Play'de ücretsiz.",
+    "endT": "Tek bir 9 ile başla.",
+    "endS": "İlk bölüm 3x3'lük bir tahta, ortasında tek bir 9 var.",
     "stores": ("App Store'da Palmo", "Google Play'de Palmo"),
     "bandAlt": "Palmo",
-    "legal": ("Gizlilik", "Kullanım koşulları", "Hesap silme"),
-    "aile_lead": "Palmo'yu Bardino yapıyor, küçük ve bağımsız bir stüdyo. Sevdiysen iki kardeşiyle de tanış:",
+    "legal": ("Gizlilik politikası", "Kullanım koşulları", "Hesap silme"),
+    "support": "Destek",
+    "studio": "Bir Bardino oyunu",
+    "nocookie": "Bu site çerez kullanmaz ve başka sunuculardan hiçbir şey "
+                "yüklemez.",
+    "aile_lead": "Bardino'nun diğer oyunları:",
     "back": "Palmo'ya dön",
     "upd": "Son güncelleme",
     "e404T": "Burada bir şey yok.",
@@ -101,29 +140,45 @@ T["tr"] = {
 }
 
 T["de"] = {
-    "title": "Palmo - Webe das ganze Brett",
-    "desc": "Ein ruhiges Puzzle. Die Zahl auf einem Samen sagt, wie viele "
-            "Felder sein Gebiet umfasst; lass jedes Gebiet auf seine eigene "
-            "Größe wachsen. Kostenlos für Android und iOS.",
-    "badge": "Jetzt erhältlich",
-    "h1a": "Die Zahl auf einem Samen",
-    "h1b": "ist die Größe seines Gebiets.",
-    "lead": "Palmo ist ein ruhiges Puzzle. Jeder Samen trägt eine Zahl, und "
-            "diese Zahl ist die Anzahl der Felder, die zu ihm gehören. Lass "
-            "jedes Gebiet auf genau seine eigene Größe wachsen, bis das Brett "
-            "bedeckt ist und nichts übrig bleibt.",
-    "small": "Kostenlos spielbar. Funktioniert offline.",
+    "title": "Palmo: Zahlen-Gewebe",
+    "desc": "Ein Rätsel um Gebiete: Jedes nummerierte Feld beginnt einen "
+            "Flicken, der genau so viele Felder nimmt wie seine Zahl. "
+            "Kostenlos für Android und iOS.",
+    "h1a": "Jeder Flicken nimmt",
+    "h1b": "so viele Felder wie seine Zahl.",
+    "lead": "Jedes nummerierte Feld auf dem Brett beginnt einen Flicken. Eine 4 "
+            "nimmt vier Felder, eine 9 nimmt neun. Ist das ganze Brett mit "
+            "Flicken der richtigen Größe zu, ist das Level fertig.",
+    "small": "Kostenlos. Offline spielbar.",
+    "howT": "So wird gespielt",
+    "how": [
+        "Tippe ein nummeriertes Feld an und nimm dann Nachbarfelder, eines "
+        "nach dem anderen. Nachbarn liegen Kante an Kante, nie über Eck.",
+        "Die Zahl auf dem Feld zählt mit jedem Feld herunter. Bei null sitzt "
+        "der Flicken; eine 4 bekommt nie ein fünftes Feld.",
+        "Eine Mauer trennt zwei Felder, kein Flicken kommt hindurch. Ein Stein "
+        "wird nie genommen; die Felder um ihn herum kommen ohne ihn aus.",
+        "Um einen sitzenden Flicken neu zu legen, halte den Finger darauf, bis "
+        "er auseinanderfällt, und zeichne ihn neu. Jedes Neuzeichnen "
+        "verbraucht einen deiner Extrazüge; was übrig ist, wenn das Brett "
+        "zugeht, wird zu Sternen.",
+    ],
+    "howS": "Jedes Brett hat genau eine Lösung.",
     "shotsT": "Aus dem Spiel",
-    "shotsS": "Echte Screenshots, keine Montagen.",
     "caps": ["Das Brett", "Ein Gebiet setzt sich", "Das Ende eines Levels",
              "Die Karte"],
     "ph": "Screenshot folgt",
-    "endT": "Jetzt erhältlich.",
-    "endS": "Kostenlos im App Store und bei Google Play.",
+    "endT": "Fang mit einer einzigen 9 an.",
+    "endS": "Level 1 ist ein Brett aus drei mal drei Feldern mit einer 9 in "
+            "der Mitte.",
     "stores": ("Palmo im App Store", "Palmo bei Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Datenschutz", "Nutzungsbedingungen", "Konto löschen"),
-    "aile_lead": "Palmo kommt von Bardino, einem kleinen unabhängigen Studio. Wenn es dir gefällt, lern seine zwei Geschwister kennen:",
+    "support": "Support",
+    "studio": "Ein Spiel von Bardino",
+    "nocookie": "Diese Website setzt keine Cookies und lädt nichts von "
+                "anderen Servern.",
+    "aile_lead": "Mehr von Bardino:",
     "back": "Zurück zu Palmo",
     "upd": "Zuletzt aktualisiert",
     "e404T": "Hier ist nichts.",
@@ -131,29 +186,44 @@ T["de"] = {
 }
 
 T["es"] = {
-    "title": "Palmo - Teje todo el tablero",
-    "desc": "Un puzle tranquilo. El número de la semilla dice cuántas casillas "
-            "tiene su región; haz crecer cada región hasta su tamaño exacto. "
-            "Gratis en Android e iOS.",
-    "badge": "Ya disponible",
-    "h1a": "El número de la semilla",
-    "h1b": "es el tamaño de su región.",
-    "lead": "Palmo es un puzle tranquilo. Cada semilla lleva un número, y ese "
-            "número es cuántas casillas le pertenecen. Haz crecer cada región "
-            "hasta su tamaño exacto, hasta que el tablero quede cubierto y no "
-            "sobre ninguna casilla.",
+    "title": "Palmo: Tejido numérico",
+    "desc": "Un puzle de regiones: cada casilla numerada empieza un retazo que "
+            "toma tantas casillas como su número. Gratis en Android e iOS.",
+    "h1a": "Cada retazo toma",
+    "h1b": "tantas casillas como su número.",
+    "lead": "Cada casilla numerada del tablero empieza un retazo. Un 4 toma "
+            "cuatro casillas, un 9 toma nueve. Cuando el tablero queda cerrado "
+            "con retazos del tamaño justo, el nivel termina.",
     "small": "Gratis. Se juega sin conexión.",
+    "howT": "Cómo se juega",
+    "how": [
+        "Toca una casilla numerada y ve tomando casillas vecinas, una a una. "
+        "Dos casillas son vecinas por el lado, nunca por la esquina.",
+        "El número de la casilla baja con cada casilla que tomas. Al llegar a "
+        "cero, el retazo se asienta; un 4 nunca tiene una quinta casilla.",
+        "Un muro corta el paso entre dos casillas y ningún retazo lo cruza. "
+        "Una piedra no se toma nunca; las casillas de alrededor se arreglan "
+        "sin ella.",
+        "Para rehacer un retazo asentado, mantén el dedo sobre él hasta que se "
+        "deshaga y vuelve a dibujarlo. Cada vez gasta uno de tus trazos "
+        "extra; los que queden cuando el tablero se cierre se convierten en "
+        "estrellas.",
+    ],
+    "howS": "Cada tablero tiene exactamente una solución.",
     "shotsT": "Del juego",
-    "shotsS": "Capturas reales, no montajes.",
     "caps": ["El tablero", "Una región que se asienta", "El final de un nivel",
              "El mapa"],
     "ph": "Captura próximamente",
-    "endT": "Ya disponible.",
-    "endS": "Gratis en el App Store y Google Play.",
+    "endT": "Empieza con un solo 9.",
+    "endS": "El nivel 1 es un tablero de tres por tres con un 9 en el centro.",
     "stores": ("Palmo en el App Store", "Palmo en Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacidad", "Términos de uso", "Eliminar cuenta"),
-    "aile_lead": "Palmo lo hace Bardino, un pequeño estudio independiente. Si te gusta, conoce a sus dos hermanos:",
+    "support": "Soporte",
+    "studio": "Un juego de Bardino",
+    "nocookie": "Este sitio no usa cookies y no carga nada desde otros "
+                "servidores.",
+    "aile_lead": "Más de Bardino:",
     "back": "Volver a Palmo",
     "upd": "Última actualización",
     "e404T": "Aquí no hay nada.",
@@ -161,30 +231,47 @@ T["es"] = {
 }
 
 T["fr"] = {
-    "title": "Palmo - Tisse tout le plateau",
-    "desc": "Un puzzle calme. Le chiffre de la graine indique combien de cases "
-            "compte sa région ; fais grandir chaque région jusqu'à sa taille "
-            "exacte. Gratuit sur Android et iOS.",
-    "badge": "Disponible",
-    "h1a": "Le chiffre de la graine",
-    "h1b": "est la taille de sa région.",
-    "lead": "Palmo est un puzzle calme. Chaque graine porte un chiffre, et ce "
-            "chiffre est le nombre de cases qui lui appartiennent. Fais "
-            "grandir chaque région jusqu'à sa taille exacte, jusqu'à ce que le "
-            "plateau soit couvert et qu'il ne reste rien.",
-    "small": "Gratuit. Jouable hors ligne.",
+    "title": "Palmo : Nombres tissés",
+    "desc": "Un casse-tête de régions : chaque case numérotée commence une "
+            "pièce qui prend autant de cases que son chiffre. Gratuit sur "
+            "Android et iOS.",
+    "h1a": "Chaque pièce prend",
+    "h1b": "autant de cases que son chiffre.",
+    "lead": "Chaque case numérotée du plateau commence une pièce. Un 4 prend "
+            "quatre cases, un 9 en prend neuf. Quand tout le plateau est fermé "
+            "avec des pièces de la bonne taille, le niveau est terminé.",
+    "small": "Gratuit. Se joue hors ligne.",
+    "howT": "Comment jouer",
+    "how": [
+        "Touche une case numérotée, puis prends les cases voisines une par "
+        "une. Deux cases sont voisines par le côté, jamais par le coin.",
+        "Le chiffre de la case baisse à chaque case prise. À zéro, la pièce se "
+        "pose ; un 4 n'a jamais de cinquième case.",
+        "Un mur coupe le passage entre deux cases et aucune pièce ne le "
+        "franchit. Une pierre ne se prend jamais ; les cases autour font sans "
+        "elle.",
+        "Pour refaire une pièce posée, garde le doigt dessus jusqu'à ce "
+        "qu'elle se défasse, puis retrace-la. Chaque nouveau tracé consomme un "
+        "de tes coups supplémentaires ; ceux qui restent à la fermeture du "
+        "plateau deviennent des étoiles.",
+    ],
+    "howS": "Chaque plateau a exactement une solution.",
     "shotsT": "Images du jeu",
-    "shotsS": "De vraies captures, pas des maquettes.",
     "caps": ["Le plateau", "Une région qui se pose", "La fin d'un niveau",
              "La carte"],
     "ph": "Capture à venir",
-    "endT": "Disponible maintenant.",
-    "endS": "Gratuit sur l'App Store et Google Play.",
+    "endT": "Commence par un seul 9.",
+    "endS": "Le niveau 1 est un plateau de trois sur trois avec un 9 au "
+            "centre.",
     "stores": ("Palmo sur l'App Store", "Palmo sur Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Confidentialité", "Conditions d'utilisation",
               "Suppression du compte"),
-    "aile_lead": "Palmo est créé par Bardino, un petit studio indépendant. Si tu l'aimes, découvre les deux autres :",
+    "support": "Assistance",
+    "studio": "Un jeu Bardino",
+    "nocookie": "Ce site ne dépose aucun cookie et ne charge rien depuis "
+                "d'autres serveurs.",
+    "aile_lead": "Aussi chez Bardino :",
     "back": "Retour à Palmo",
     "upd": "Dernière mise à jour",
     "e404T": "Il n'y a rien ici.",
@@ -192,29 +279,43 @@ T["fr"] = {
 }
 
 T["pt"] = {
-    "title": "Palmo - Teça o tabuleiro inteiro",
-    "desc": "Um puzzle tranquilo. O número da semente diz quantas células a "
-            "região tem; faça cada região crescer até o seu tamanho exato. "
-            "Grátis para Android e iOS.",
-    "badge": "Já disponível",
-    "h1a": "O número da semente",
-    "h1b": "é o tamanho da sua região.",
-    "lead": "Palmo é um puzzle tranquilo. Cada semente carrega um número, e "
-            "esse número é quantas células pertencem a ela. Faça cada região "
-            "crescer até o seu tamanho exato, até o tabuleiro ficar coberto e "
-            "não sobrar nenhuma célula.",
-    "small": "Grátis. Joga-se offline.",
+    "title": "Palmo: Trama numérica",
+    "desc": "Um quebra-cabeça de regiões: cada casa numerada começa um retalho "
+            "que pega tantas casas quanto o seu número. Grátis para Android e "
+            "iOS.",
+    "h1a": "Cada retalho pega",
+    "h1b": "tantas casas quanto o seu número.",
+    "lead": "Cada casa numerada do tabuleiro começa um retalho. Um 4 pega "
+            "quatro casas, um 9 pega nove. Quando o tabuleiro inteiro fecha "
+            "com retalhos do tamanho certo, a fase termina.",
+    "small": "Grátis. Dá para jogar sem internet.",
+    "howT": "Como jogar",
+    "how": [
+        "Toque numa casa numerada e vá pegando as casas vizinhas, uma a uma. "
+        "Duas casas são vizinhas pelo lado, nunca pelo canto.",
+        "O número da casa cai a cada casa que você pega. No zero, o retalho "
+        "assenta; um 4 nunca ganha uma quinta casa.",
+        "Um muro corta a passagem entre duas casas e nenhum retalho atravessa. "
+        "Uma pedra nunca é pega; as casas em volta se viram sem ela.",
+        "Para refazer um retalho assentado, segure o dedo nele até se desfazer "
+        "e desenhe de novo. Cada vez gasta uma das suas jogadas extras; as que "
+        "sobrarem quando o tabuleiro fechar viram estrelas.",
+    ],
+    "howS": "Cada tabuleiro tem exatamente uma solução.",
     "shotsT": "Do jogo",
-    "shotsS": "Capturas reais, não montagens.",
     "caps": ["O tabuleiro", "Uma região se assentando", "O fim de uma fase",
              "O mapa"],
     "ph": "Captura em breve",
-    "endT": "Já disponível.",
-    "endS": "Grátis na App Store e no Google Play.",
+    "endT": "Comece com um único 9.",
+    "endS": "A fase 1 é um tabuleiro de três por três com um 9 no meio.",
     "stores": ("Palmo na App Store", "Palmo no Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacidade", "Termos de uso", "Excluir conta"),
-    "aile_lead": "Palmo é feito pela Bardino, um pequeno estúdio independente. Se você gostar, conheça os outros dois:",
+    "support": "Suporte",
+    "studio": "Um jogo da Bardino",
+    "nocookie": "Este site não usa cookies e não carrega nada de outros "
+                "servidores.",
+    "aile_lead": "Mais da Bardino:",
     "back": "Voltar ao Palmo",
     "upd": "Última atualização",
     "e404T": "Não há nada aqui.",
@@ -251,6 +352,12 @@ def langs_with(page):
     return [c for c, _l, _o, _n in LANGS if c in LEGAL_LANGS]
 
 
+def html_lang(code):
+    """Dilin html lang / hreflang degeri. Portekizce metin Brezilya
+    Portekizcesi (voce, fase, tela), o yuzden pt-BR; yol /pt/ olarak kalir."""
+    return dict((c, l) for c, l, _o, _n in LANGS)[code]
+
+
 def has(rel):
     return os.path.exists(os.path.join(HERE, rel.replace("/", os.sep)))
 
@@ -263,13 +370,11 @@ def esc(s):
 def inline_svg(rel, cls):
     """SVG'yi HTML'in icine gomer.
 
-    <img> icindeki bir SVG belgenin yazi tiplerine ULASAMAZ. Kilit ve isaret
-    Nunito 900 ile cizilmis <text> tasiyor; <img src> olarak konulsalardi
-    ziyaretcinin sistem yazi tipiyle render olurlardi ve marka her makinede
-    baska turlu gorunurdu. Gomulu SVG sayfanin fontunu kullanir.
-
-    Kalici cozum harfleri outline'a cevirmektir (bkz. README); o gun bu
-    fonksiyon durur, yalnizca dosyalar degisir.
+    Harfler artik kontur (tools/outline-svg.py), fonta ihtiyac yok. Gomulu
+    kalmasinin sebebi koyu tema: style.css kilidin lacivert konturunu
+    `.kilit [stroke=...]` ile degistiriyor ve bu ancak SVG belgenin icindeyse
+    calisir. Erisilebilir ad SVG'nin kendi role="img" aria-label="Palmo"
+    oznitelikleri; icinde okunacak metin yok.
     """
     raw = io.open(os.path.join(HERE, rel.replace("/", os.sep)),
                   encoding="utf-8").read().strip()
@@ -282,12 +387,12 @@ def inline_svg(rel, cls):
 # ── iskelet ─────────────────────────────────────────────────────────────────
 
 def head(code, page, title, desc, index=True):
-    lang = dict((c, l) for c, l, _o, _n in LANGS)[code]
+    lang = html_lang(code)
     loc = dict((c, o) for c, _l, o, _n in LANGS)[code]
     avail = langs_with(page)
     alts = "\n    ".join(
         '<link rel="alternate" hreflang="%s" href="%s/%s">'
-        % (c, SITE, path_for(c, page)) for c in avail)
+        % (html_lang(c), SITE, path_for(c, page)) for c in avail)
     # x-default sayfa bazli: gizlilik sayfasinin dil-notr karsiligi ana sayfa
     # degil, Ingilizce gizlilik sayfasidir.
     alts += ('\n    <link rel="alternate" hreflang="x-default" href="%s/%s">'
@@ -327,9 +432,8 @@ def head(code, page, title, desc, index=True):
 %(canon)s    %(alts)s
     <link rel="icon" type="image/svg+xml" href="/%(mark)s">%(touch)s
     <link rel="manifest" href="/manifest.json">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/assets/fonts/nunito-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/nunito-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/css/style.css">%(extra)s
 </head>
 <body>
@@ -342,14 +446,24 @@ def head(code, page, title, desc, index=True):
 
 
 def lang_bar(code, page):
+    """Dil cubugu. Genis ekranda tam ad, 720 pikselin altinda kod (EN TR...).
+
+    375 piksellik telefonda alti tam ad uc satira tasiyordu. Kod yalnizca
+    gorunur yazi: aria-hidden, ekran okuyucu her genislikte tam adi okur
+    (css: .dil-ad gorsel olarak gizlenir, DOM'dan cikmaz). lang her baglantida,
+    "Deutsch" Almanca okunsun diye.
+    """
     avail = set(langs_with(page))
     out = []
     for c, _l, _o, name in LANGS:
         if c not in avail:
             continue
         cur = ' aria-current="page"' if c == code else ""
-        out.append('<a href="/%s" hreflang="%s"%s>%s</a>'
-                   % (path_for(c, page), c, cur, esc(name)))
+        out.append('<a href="/%s" hreflang="%s" lang="%s"%s>'
+                   '<span class="dil-ad">%s</span>'
+                   '<span class="dil-kod" aria-hidden="true">%s</span></a>'
+                   % (path_for(c, page), html_lang(c), html_lang(c), cur,
+                      esc(name), c.upper()))
     return '<div class="diller">%s</div>' % "".join(out)
 
 
@@ -381,7 +495,10 @@ BARDINO_LOGO = (
 
 # Kardes oyunlarin kisa tanimi, her dilde. Decimo'nunki magazadaki adinin
 # ikinci yarisi (Decimo deposu tools/store/listing-copy.mjs, ASC_BASLIK);
-# Colmo ve Palmo'nunki kendi sitelerinin basligindaki slogan.
+# Colmo'nunki kendi sitesinin basligindaki slogan. Palmo'nunki de magaza
+# adinin ikinci yarisi (palmo deposu android/fastlane/metadata/android/<dil>/
+# title.txt); bu sitede kullanilmiyor, kardes sitelere kaynak olsun diye
+# burada.
 KARDES_TAG = {
     "decimo": {"en": "Number chain", "tr": "Sayı zinciri", "de": "Zahlenkette",
                "fr": "Chaîne de nombres", "es": "Cadena de números",
@@ -392,9 +509,9 @@ KARDES_TAG = {
               "fr": "Remplis les bocaux à ras bord",
               "es": "Llena los tarros hasta el borde",
               "pt": "Encha os potes até a borda"},
-    "palmo": {"en": "Weave the whole board", "tr": "Bütün tahtayı doku",
-              "de": "Webe das ganze Brett", "fr": "Tisse tout le plateau",
-              "es": "Teje todo el tablero", "pt": "Teça o tabuleiro inteiro"},
+    "palmo": {"en": "Number Weave", "tr": "Sayı Dokuma",
+              "de": "Zahlen-Gewebe", "fr": "Nombres tissés",
+              "es": "Tejido numérico", "pt": "Trama numérica"},
 }
 KARDES_AD = {"decimo": "Decimo", "colmo": "Colmo", "palmo": "Palmo"}
 
@@ -423,17 +540,35 @@ def aile(code, t, kardesler):
 
 
 
+def mail_link(label=None):
+    """E-posta baglantisi, Cloudflare'in dokunmayacagi bicimde.
+
+    Site Cloudflare arkasinda ve E-posta Adresi Gizleme acik: isaretsiz bir
+    adres /cdn-cgi/l/email-protection#... baglantisina cevrilir ve JavaScript
+    kapaliyken o adres 404. email_off yorumlari Cloudflare'e bu parcayi
+    oldugu gibi birakmasini soyler.
+    """
+    return ('<!--email_off-->%s<a href="mailto:%s">%s</a><!--/email_off-->'
+            % (esc(label) + ": " if label else "", MAIL, MAIL))
+
+
+# Altbilgi uc oyun sitesinde ayni sirada (ortak brif, 14 Ekim 2026):
+#   1. satir: Gizlilik politikasi · Kullanim kosullari · Hesap silme ·
+#             Destek: info@bardino.app
+#   2. satir: Bir Bardino oyunu (bardino.app) · (c) 2026 Bardino Technology
+#   3. satir: cerez yok, baska sunucudan yukleme yok.
+# Ayiraclar aria-hidden: ekran okuyucu "orta nokta" demesin.
+SEP = '<span class="f-ayrac" aria-hidden="true"> · </span>'
+
+
 def footer(code, t):
     p, tm, ad = t["legal"]
     lc = code if code in LEGAL_LANGS else ROOT_LANG
     return """<footer class="aile">
 %(aile)s    <div class="kap aile-alt">
-        <div class="f-baglantilar">
-            <a href="/%(lp)s">%(p)s</a>
-            <a href="/%(lt)s">%(tm)s</a>
-            <a href="/%(la)s">%(ad)s</a>
-        </div>
-        <span>&copy; 2026 %(dev)s</span>
+        <p class="f-baglantilar"><a href="/%(lp)s">%(p)s</a>%(sep)s<a href="/%(lt)s">%(tm)s</a>%(sep)s<a href="/%(la)s">%(ad)s</a>%(sep)s<span class="f-destek">%(mail)s</span></p>
+        <p class="f-studyo"><a href="%(studyo)s">%(studio)s</a>%(sep)s&copy; 2026 %(dev)s</p>
+        <p class="f-not">%(nocookie)s</p>
     </div>
 </footer>
 
@@ -441,7 +576,9 @@ def footer(code, t):
 </body>
 </html>
 """ % dict(aile=aile(code, t, ("decimo", "colmo")), p=esc(p), tm=esc(tm), ad=esc(ad),
-           dev=DEV,
+           dev=DEV, sep=SEP, mail=mail_link(t["support"]),
+           studyo="https://bardino.app/tr/" if code == "tr" else "https://bardino.app/",
+           studio=esc(t["studio"]), nocookie=esc(t["nocookie"]),
            lp=path_for(lc, "privacy.html"), lt=path_for(lc, "terms.html"),
            la=path_for(lc, "account-deletion.html"))
 
@@ -494,9 +631,14 @@ def landing(code, t):
     degisecek. GORSEL UYDURULMUYOR: gorunen her kare oyunun kendi ekran
     goruntusu, yoksa acikca bos bir cerceve.
 
-    Colmo'dan ayrilan yer: orada kural hic anlatilmiyordu. Palmo'nun kurali tek
-    cumlede soyleniyor cunku "tohumdaki rakam bolgenin buyuklugudur" bir ozellik
-    listesi degil, oyunun ne oldugunun kendisi. Bunun otesine gecilmiyor.
+    Kural basliktan baslayip "Nasil oynanir" bolumunde dort adimda anlatiliyor:
+    "her yama rakami kadar hucre alir" bir ozellik listesi degil, oyunun ne
+    oldugunun kendisi. Adimlar magaza aciklamasindaki kurallarla ayni; bir
+    ozellik listesine donusmesin diye sayi, mod, joker anlatilmiyor.
+
+    "Yayinda" rozeti yok: kapanistaki magaza cagrisiyla ayni seyi iki kez
+    soyluyordu. "Gercek ekran goruntusu" alt basligi da yok; kendini savunan
+    bir cumle okuyana tersini dusunduruyor.
     """
     caps = t["caps"]
     shots = "".join(
@@ -524,7 +666,6 @@ def landing(code, t):
 <section class="kahraman">
     <div class="kap">
         <div>
-            <span class="rozet">%(badge)s</span>
             <h1>%(h1a)s<br><em>%(h1b)s</em></h1>
             <p class="alt">%(lead)s</p>
             <p class="kucuk">%(small)s</p>
@@ -534,10 +675,17 @@ def landing(code, t):
     </div>
 </section>
 %(band)s
+<section class="nasil">
+    <div class="kap">
+        <h2>%(howT)s</h2>
+        <ol class="adimlar">%(how)s</ol>
+        <p class="bolum-alt">%(howS)s</p>
+    </div>
+</section>
+
 <section class="duvar-bolum">
     <div class="kap">
         <h2>%(shotsT)s</h2>
-        <p class="bolum-alt">%(shotsS)s</p>
         <div class="vitrin">%(shots)s</div>
     </div>
 </section>
@@ -551,9 +699,11 @@ def landing(code, t):
         </div>
     </div>
 </section>
-""" % dict(badge=esc(t["badge"]), h1a=esc(t["h1a"]), h1b=esc(t["h1b"]),
+""" % dict(h1a=esc(t["h1a"]), h1b=esc(t["h1b"]),
            lead=esc(t["lead"]), small=esc(t["small"]), hero=hero_gorsel,
-           band=band, shotsT=esc(t["shotsT"]), shotsS=esc(t["shotsS"]),
+           band=band, howT=esc(t["howT"]), howS=esc(t["howS"]),
+           how="".join("<li>%s</li>" % esc(s) for s in t["how"]),
+           shotsT=esc(t["shotsT"]),
            shots=shots, endT=esc(t["endT"]), endS=esc(t["endS"]),
            stores=stores(code, t))
             + """
@@ -570,9 +720,24 @@ def landing(code, t):
   "publisher": {"@type": "Organization", "name": "%(dev)s"}
 }
 </script>
-""" % dict(site=SITE, app=APP, dev=DEV, code=code,
+""" % dict(site=SITE, app=APP, dev=DEV, code=html_lang(code),
            path=path_for(code, "index.html"))
             + footer(code, t))
+
+
+MONTHS = {
+    "en": ("January", "February", "March", "April", "May", "June", "July",
+           "August", "September", "October", "November", "December"),
+    "tr": ("Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz",
+           "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"),
+}
+
+
+def long_date(iso, code):
+    """2026-08-30 -> "30 August 2026" / "30 Ağustos 2026". Uc sitede ayni
+    bicim; sitemap'teki lastmod ISO kalir."""
+    y, m, d = (int(x) for x in iso.split("-"))
+    return "%d %s %d" % (d, MONTHS[code][m - 1], y)
 
 
 def legal(code, t, page, title, desc, body):
@@ -583,12 +748,13 @@ def legal(code, t, page, title, desc, body):
     <div class="kap">
         <a class="geri" href="/%(home)s">&larr; %(back)s</a>
         <h1>%(title)s</h1>
-        <p class="tarih">%(upd)s: %(date)s</p>
+        <p class="tarih">%(upd)s: <time datetime="%(iso)s">%(date)s</time></p>
         <div class="govde">%(body)s</div>
     </div>
 </section>
 """ % dict(home=path_for(code, "index.html"), back=esc(t["back"]),
-           title=esc(title), date=UPDATED[page], body=body,
+           title=esc(title), date=long_date(UPDATED[page], code),
+           iso=UPDATED[page], body=body,
            upd=esc(t["upd"]))
             + footer(code, t))
 

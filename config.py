@@ -27,16 +27,17 @@ UPDATED = {
     "account-deletion.html": "2026-08-30",
 }
 
-# Dil kodu -> (html lang, og locale, kendi dilindeki adi)
+# Dil kodu (yol) -> (html lang + hreflang, og locale, kendi dilindeki adi)
 # Sira ve adlar uygulamanin `lib/l10n/strings.dart` dosyasindaki `localeNames`
-# ile ayni; iki taraf ayrismasin diye oradan alindi.
+# ile ayni; iki taraf ayrismasin diye oradan alindi. Portekizce metin Brezilya
+# Portekizcesi (voce, fase) ve magaza kaydi da pt-BR: lang pt-BR, yol /pt/.
 LANGS = [
     ("en", "en", "en_US", "English"),
     ("tr", "tr", "tr_TR", "Türkçe"),
     ("de", "de", "de_DE", "Deutsch"),
     ("es", "es", "es_ES", "Español"),
     ("fr", "fr", "fr_FR", "Français"),
-    ("pt", "pt", "pt_BR", "Português"),
+    ("pt", "pt-BR", "pt_BR", "Português"),
 ]
 
 # Kok dizinin dili. Magaza kaydi varsayilan olarak Ingilizce listelenecek ve
