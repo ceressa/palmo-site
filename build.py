@@ -64,7 +64,7 @@ T["en"] = {
     "stores": ("Palmo on the App Store", "Palmo on Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacy", "Terms of use", "Account deletion"),
-    "lead": "Palmo is made by Bardino, a small independent studio. If you like it, meet its two siblings:",
+    "aile_lead": "Palmo is made by Bardino, a small independent studio. If you like it, meet its two siblings:",
     "back": "Back to Palmo",
     "upd": "Last updated",
     "e404T": "Nothing here.",
@@ -93,7 +93,7 @@ T["tr"] = {
     "stores": ("App Store'da Palmo", "Google Play'de Palmo"),
     "bandAlt": "Palmo",
     "legal": ("Gizlilik", "Kullanım koşulları", "Hesap silme"),
-    "lead": "Palmo'yu Bardino yapıyor, küçük ve bağımsız bir stüdyo. Sevdiysen iki kardeşiyle de tanış:",
+    "aile_lead": "Palmo'yu Bardino yapıyor, küçük ve bağımsız bir stüdyo. Sevdiysen iki kardeşiyle de tanış:",
     "back": "Palmo'ya dön",
     "upd": "Son güncelleme",
     "e404T": "Burada bir şey yok.",
@@ -123,7 +123,7 @@ T["de"] = {
     "stores": ("Palmo im App Store", "Palmo bei Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Datenschutz", "Nutzungsbedingungen", "Konto löschen"),
-    "lead": "Palmo kommt von Bardino, einem kleinen unabhängigen Studio. Wenn es dir gefällt, lern seine zwei Geschwister kennen:",
+    "aile_lead": "Palmo kommt von Bardino, einem kleinen unabhängigen Studio. Wenn es dir gefällt, lern seine zwei Geschwister kennen:",
     "back": "Zurück zu Palmo",
     "upd": "Zuletzt aktualisiert",
     "e404T": "Hier ist nichts.",
@@ -153,7 +153,7 @@ T["es"] = {
     "stores": ("Palmo en el App Store", "Palmo en Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacidad", "Términos de uso", "Eliminar cuenta"),
-    "lead": "Palmo lo hace Bardino, un pequeño estudio independiente. Si te gusta, conoce a sus dos hermanos:",
+    "aile_lead": "Palmo lo hace Bardino, un pequeño estudio independiente. Si te gusta, conoce a sus dos hermanos:",
     "back": "Volver a Palmo",
     "upd": "Última actualización",
     "e404T": "Aquí no hay nada.",
@@ -184,7 +184,7 @@ T["fr"] = {
     "bandAlt": "Palmo",
     "legal": ("Confidentialité", "Conditions d'utilisation",
               "Suppression du compte"),
-    "lead": "Palmo est créé par Bardino, un petit studio indépendant. Si tu l'aimes, découvre les deux autres :",
+    "aile_lead": "Palmo est créé par Bardino, un petit studio indépendant. Si tu l'aimes, découvre les deux autres :",
     "back": "Retour à Palmo",
     "upd": "Dernière mise à jour",
     "e404T": "Il n'y a rien ici.",
@@ -214,7 +214,7 @@ T["pt"] = {
     "stores": ("Palmo na App Store", "Palmo no Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacidade", "Termos de uso", "Excluir conta"),
-    "lead": "Palmo é feito pela Bardino, um pequeno estúdio independente. Se você gostar, conheça os outros dois:",
+    "aile_lead": "Palmo é feito pela Bardino, um pequeno estúdio independente. Se você gostar, conheça os outros dois:",
     "back": "Voltar ao Palmo",
     "upd": "Última atualização",
     "e404T": "Não há nada aqui.",
@@ -429,7 +429,7 @@ def aile(code, t, kardesler):
         </div>
     </div>
 """ % dict(studyo="https://bardino.app/tr/" if code == "tr" else "https://bardino.app/",
-           logo=BARDINO_LOGO, lead=esc(t["lead"]), kart=kart)
+           logo=BARDINO_LOGO, lead=esc(t["aile_lead"]), kart=kart)
 
 
 
