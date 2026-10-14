@@ -235,16 +235,36 @@ h2 {
 .kapanis .kutu .bolum-alt { margin-bottom: 0; }
 
 /* ── Altbilgi ───────────────────────────────────────────────────────── */
+/* Uc oyun sitesinde ayni yapi (bkz. build.py aile()): Bardino logosu, tek
+   cumle ve iki kardes kart, en altta yasal satir. Burada Palmo'nun
+   kurallariyla ciziliyor: kot daima asagi (0 Npx 0), blur yok. */
 footer {
   border-top: var(--s-patch) solid var(--ink);
-  background: var(--well); padding: 26px 0 30px;
+  background: var(--well); padding: 34px 0 26px;
 }
-footer .kap { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
-footer span { color: var(--text-2); font-size: 15px; }
+.aile-ust { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 22px 36px; align-items: center; }
+@media (max-width: 760px) { .aile-ust { grid-template-columns: 1fr; } }
+.aile-marka { display: inline-block; color: var(--head); border-radius: var(--r-chrome); }
+.aile-logo { width: min(230px, 62vw); height: auto; display: block; }
+.aile-kardes p { color: var(--text); font-size: 15.5px; font-weight: 700; margin-bottom: 12px; }
+.aile-kardes ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.aile-kardes a {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px;
+  text-decoration: none; background: var(--surface);
+  border: var(--s-patch) solid var(--ink); border-radius: var(--r-chrome);
+  box-shadow: var(--lift-chrome);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.aile-kardes a:hover { transform: translateY(-1px); box-shadow: 0 4px 0 var(--ink); }
+.aile-kardes img { width: 44px; height: 44px; border-radius: 11px; flex: none; }
+.aile-kardes b { display: block; color: var(--head); font-size: 16px; font-weight: 900; line-height: 1.2; }
+.aile-kardes small { display: block; color: var(--text-2); font-size: 13.5px; font-weight: 800; line-height: 1.35; }
+.aile-alt { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; margin-top: 26px; }
+.aile-alt > span { color: var(--text-2); font-size: 13.5px; }
+@media (prefers-reduced-motion: reduce) { .aile-kardes a { transition: none; } }
 .f-baglantilar { display: flex; gap: 18px; flex-wrap: wrap; }
 .f-baglantilar a { color: var(--head); font-weight: 800; font-size: 15px; text-decoration: none; }
 .f-baglantilar a:hover { color: var(--pink-dark); text-decoration: underline; }
-.f-alt { margin-top: 14px; color: var(--text-2); font-size: 13.5px; justify-content: flex-start; }
 
 /* Klavye ile gezenin nerede oldugu gorunsun. */
 a:focus-visible {

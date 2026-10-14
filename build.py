@@ -19,7 +19,7 @@ import os
 import re
 import struct
 
-from config import (APP, APP_STORE, DEV, DEV_URL, DOMAIN, GOOGLE_PLAY, LANGS,
+from config import (APP, APP_STORE, DEV, DOMAIN, GOOGLE_PLAY, LANGS,
                     LEGAL_LANGS, LEGAL_PAGES, ROOT_LANG, SITE, UPDATED)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -64,7 +64,7 @@ T["en"] = {
     "stores": ("Palmo on the App Store", "Palmo on Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacy", "Terms of use", "Account deletion"),
-    "by": "Palmo is made by",
+    "lead": "Palmo is made by Bardino, a small independent studio. If you like it, meet its two siblings:",
     "back": "Back to Palmo",
     "upd": "Last updated",
     "e404T": "Nothing here.",
@@ -93,7 +93,7 @@ T["tr"] = {
     "stores": ("App Store'da Palmo", "Google Play'de Palmo"),
     "bandAlt": "Palmo",
     "legal": ("Gizlilik", "Kullanım koşulları", "Hesap silme"),
-    "by": "Palmo'yu yapan",
+    "lead": "Palmo'yu Bardino yapıyor, küçük ve bağımsız bir stüdyo. Sevdiysen iki kardeşiyle de tanış:",
     "back": "Palmo'ya dön",
     "upd": "Son güncelleme",
     "e404T": "Burada bir şey yok.",
@@ -123,7 +123,7 @@ T["de"] = {
     "stores": ("Palmo im App Store", "Palmo bei Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Datenschutz", "Nutzungsbedingungen", "Konto löschen"),
-    "by": "Palmo stammt von",
+    "lead": "Palmo kommt von Bardino, einem kleinen unabhängigen Studio. Wenn es dir gefällt, lern seine zwei Geschwister kennen:",
     "back": "Zurück zu Palmo",
     "upd": "Zuletzt aktualisiert",
     "e404T": "Hier ist nichts.",
@@ -153,7 +153,7 @@ T["es"] = {
     "stores": ("Palmo en el App Store", "Palmo en Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacidad", "Términos de uso", "Eliminar cuenta"),
-    "by": "Palmo está hecho por",
+    "lead": "Palmo lo hace Bardino, un pequeño estudio independiente. Si te gusta, conoce a sus dos hermanos:",
     "back": "Volver a Palmo",
     "upd": "Última actualización",
     "e404T": "Aquí no hay nada.",
@@ -184,7 +184,7 @@ T["fr"] = {
     "bandAlt": "Palmo",
     "legal": ("Confidentialité", "Conditions d'utilisation",
               "Suppression du compte"),
-    "by": "Palmo est réalisé par",
+    "lead": "Palmo est créé par Bardino, un petit studio indépendant. Si tu l'aimes, découvre les deux autres :",
     "back": "Retour à Palmo",
     "upd": "Dernière mise à jour",
     "e404T": "Il n'y a rien ici.",
@@ -214,7 +214,7 @@ T["pt"] = {
     "stores": ("Palmo na App Store", "Palmo no Google Play"),
     "bandAlt": "Palmo",
     "legal": ("Privacidade", "Termos de uso", "Excluir conta"),
-    "by": "Palmo é feito por",
+    "lead": "Palmo é feito pela Bardino, um pequeno estúdio independente. Se você gostar, conheça os outros dois:",
     "back": "Voltar ao Palmo",
     "upd": "Última atualização",
     "e404T": "Não há nada aqui.",
@@ -364,25 +364,93 @@ def header(code, page):
            lockup=inline_svg(LOCKUP, "kilit"))
 
 
+# ── altbilgi: aile blogu ────────────────────────────────────────────────────
+#
+# Uc oyun sitesinde (decimo, colmo, palmo) altbilgi AYNI yapida: solda
+# Bardino'nun kendi logosu (isaret + yazi, altinda slogan yok), sagda tek
+# cumle ve iki kardes oyunun karti, en altta yasal satir. Her site bunu kendi
+# kurallariyla ciziyor; yapi ortak, gorunum oyunun. Eskiden burada tek bir
+# "X is made by Bardino Technology." satiri vardi ve kardes oyunlar hic
+# anilmiyordu.
+#
+# Logo bardino.app'teki isaretin ve yazinin AYNISI (bkz. bardino-site
+# index.html, bd-mark / bd-wm). Yazi currentColor; koyu temada CSS acar.
+BARDINO_LOGO = (
+    '<svg class="aile-logo" viewBox="0 0 600 124" role="img" aria-label="Bardino">'
+    '<rect x="4.5" y="13.5" width="91" height="87" rx="21" fill="#1B2F4A" stroke="#1B2F4A" stroke-width="5"/>'
+    '<rect x="4.5" y="7" width="91" height="87" rx="21" fill="#FFC83D" stroke="#1B2F4A" stroke-width="5"/>'
+    '<g fill="none" stroke="#1B2F4A" stroke-width="11.2" stroke-linecap="round"><path d="M37.1 26.1V72.9"/><circle cx="51.5" cy="58.5" r="14.4"/></g>'
+    '<g transform="translate(124 12) scale(.656)">'
+    '<g fill="none" stroke="currentColor" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">'
+    '<path d="M16 19V136"/><circle cx="52" cy="100" r="36"/><circle cx="166" cy="100" r="36"/><path d="M202 64V136"/>'
+    '<path d="M252 64V136M252 100A36 36 0 0 1 297.32 65.23"/><circle cx="374" cy="100" r="36"/><path d="M410 19V136"/>'
+    '<path d="M460 64V136"/><path d="M510 64V136M510 100A36 36 0 0 1 582 100V136"/><circle cx="664" cy="100" r="36"/></g>'
+    '<rect x="444" y="5" width="32" height="32" rx="9" fill="#FFC83D" stroke="currentColor" stroke-width="5"/></g>'
+    '</svg>')
+
+# Kardes oyunlarin kisa tanimi, her dilde. Decimo'nunki magazadaki adinin
+# ikinci yarisi (Decimo deposu tools/store/listing-copy.mjs, ASC_BASLIK);
+# Colmo ve Palmo'nunki kendi sitelerinin basligindaki slogan.
+KARDES_TAG = {
+    "decimo": {"en": "Number chain", "tr": "Sayı zinciri", "de": "Zahlenkette",
+               "fr": "Chaîne de nombres", "es": "Cadena de números",
+               "pt": "Corrente de números"},
+    "colmo": {"en": "Fill every jar to the brim",
+              "tr": "Kavanozları ağzına kadar doldur",
+              "de": "Fülle die Gläser bis zum Rand",
+              "fr": "Remplis les bocaux à ras bord",
+              "es": "Llena los tarros hasta el borde",
+              "pt": "Encha os potes até a borda"},
+    "palmo": {"en": "Weave the whole board", "tr": "Bütün tahtayı doku",
+              "de": "Webe das ganze Brett", "fr": "Tisse tout le plateau",
+              "es": "Teje todo el tablero", "pt": "Teça o tabuleiro inteiro"},
+}
+KARDES_AD = {"decimo": "Decimo", "colmo": "Colmo", "palmo": "Palmo"}
+
+
+def kardes_url(g, code):
+    """Kardesin sitesi, ayni dilde. Decimo'nun sitesi yalniz Turkce."""
+    if g == "decimo":
+        return "https://decimo.bardino.app/"
+    return "https://%s.bardino.app/%s" % (g, "" if code == "en" else code + "/")
+
+
+def aile(code, t, kardesler):
+    kart = "".join(
+        '<li><a href="%s"><img src="/assets/aile/%s.webp" alt="" width="44" '
+        'height="44" loading="lazy"><span><b>%s</b><small>%s</small></span></a></li>'
+        % (kardes_url(g, code), g, KARDES_AD[g], esc(KARDES_TAG[g][code]))
+        for g in kardesler)
+    return """    <div class="kap aile-ust">
+        <a class="aile-marka" href="%(studyo)s">%(logo)s</a>
+        <div class="aile-kardes">
+            <p>%(lead)s</p>
+            <ul>%(kart)s</ul>
+        </div>
+    </div>
+""" % dict(studyo="https://bardino.app/tr/" if code == "tr" else "https://bardino.app/",
+           logo=BARDINO_LOGO, lead=esc(t["lead"]), kart=kart)
+
+
+
 def footer(code, t):
     p, tm, ad = t["legal"]
     lc = code if code in LEGAL_LANGS else ROOT_LANG
-    return """<footer>
-    <div class="kap">
-        <span>%(by)s <a href="%(devurl)s">%(dev)s</a>.</span>
+    return """<footer class="aile">
+%(aile)s    <div class="kap aile-alt">
         <div class="f-baglantilar">
             <a href="/%(lp)s">%(p)s</a>
             <a href="/%(lt)s">%(tm)s</a>
             <a href="/%(la)s">%(ad)s</a>
         </div>
+        <span>&copy; 2026 %(dev)s</span>
     </div>
-    <div class="kap f-alt">&copy; 2026 %(dev)s</div>
 </footer>
 
 </body>
 </html>
-""" % dict(by=esc(t["by"]), p=esc(p), tm=esc(tm), ad=esc(ad),
-           dev=DEV, devurl=DEV_URL,
+""" % dict(aile=aile(code, t, ("decimo", "colmo")), p=esc(p), tm=esc(tm), ad=esc(ad),
+           dev=DEV,
            lp=path_for(lc, "privacy.html"), lt=path_for(lc, "terms.html"),
            la=path_for(lc, "account-deletion.html"))
 
