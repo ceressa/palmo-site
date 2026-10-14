@@ -271,3 +271,11 @@ a:focus-visible {
   outline: var(--s-patch) solid var(--teal-dark);
   outline-offset: 3px; border-radius: 4px;
 }
+
+/* Bardino kilidi ve acilis filmi (assets/bardino-intro.js). Nokta ucarken
+   kutunun ustune cikiyor; overflow gorunur olmali. Kontur ve golge rengi
+   --bi-edge'den, yazi currentColor'dan. */
+.bardino-intro { overflow: visible; }
+.bardino-intro .bi-ef { fill: var(--bi-edge, #1B2F4A); }
+.bardino-intro .bi-es { stroke: var(--bi-edge, #1B2F4A); }
+.aile-marka { --bi-edge: var(--ink); }
