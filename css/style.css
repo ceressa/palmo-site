@@ -46,6 +46,40 @@
   --lift-chrome: 0 3px 0 var(--ink);
   --lift-card:   0 4px 0 var(--ink);
   --lift-panel:  0 8px 0 var(--ink);
+
+  /* Baslik rengi --ink'ten ayrildi. Acik temada ikisi ayni lacivert; koyu
+     temada --ink (kontur, kot) koyulasir, baslik acilir. */
+  --head:       var(--ink);
+  --top:        rgba(255, 244, 251, .94);
+  color-scheme: light dark;
+}
+
+/* Koyu tema: sistem tercihine uyuyor, bardino.app ile ayni kural. Oyunun koyu
+   temasi yok; zemin bardino.app'in koyu temada Palmo kartina verdigi renk
+   (#1B2F4A, oyunun murekkebi), kontur ve kot oradaki #07060F. Ara tonlar bu
+   ikisiyle acik metin renginin karisimi. Pembe ve turkuaz vurgularin koyu
+   tonu lacivert zeminde okunmuyor; yerlerine oyunun kendi acik tonlari
+   (pinkLight #FFB8D4, tealLight #8CEAE6) geliyor. Degisken adlari rol adi
+   olarak kaldi. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:         #1B2F4A;
+    --surface:    #2D3F57;
+    --well:       #152338;
+    --well-deep:  #3E5878;
+    --ink:        #07060F;
+    --text:       #E9E3EF;
+    --text-2:     #B8C4D6;
+    --head:       #FDF6F0;
+    --pink-dark:  #FFB8D4;
+    --teal-dark:  #8CEAE6;
+    --top:        rgba(27, 47, 74, .94);
+  }
+  /* Kilit SVG'si sayfaya gomulu (build.py inline_svg); konturu ve golge
+     katmani lacivert ve lacivert zeminde kayboluyor. Koyu temada konturun
+     rengini aliyor, harflerin kendi renkleri degismiyor. */
+  .kilit [stroke="#1B2F4A"] { stroke: var(--ink); }
+  .kilit [fill="#1B2F4A"] { fill: var(--ink); }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,7 +106,7 @@ a { color: var(--pink-dark); }
 /* ── Ust bar ─────────────────────────────────────────────────────────── */
 .ust {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(255, 244, 251, .94);
+  background: var(--top);
   border-bottom: var(--s-patch) solid var(--ink);
 }
 .ust .kap { display: flex; align-items: center; gap: 14px; padding: 10px 0; }
@@ -91,9 +125,9 @@ a { color: var(--pink-dark); }
   font-size: 13px; font-weight: 800; text-decoration: none;
   color: var(--text-2); border: 2px solid transparent;
 }
-.diller a:hover { color: var(--ink); border-color: var(--well-deep); }
+.diller a:hover { color: var(--head); border-color: var(--well-deep); }
 .diller a[aria-current="page"] {
-  color: var(--ink); background: var(--surface);
+  color: var(--head); background: var(--surface);
   border-color: var(--ink); box-shadow: var(--lift-chrome);
 }
 
@@ -123,7 +157,7 @@ a { color: var(--pink-dark); }
 .kahraman h1 {
   margin: 20px 0 14px;
   font-size: clamp(33px, 5.4vw, 52px); line-height: 1.1;
-  font-weight: 900; letter-spacing: -.02em; color: var(--ink);
+  font-weight: 900; letter-spacing: -.02em; color: var(--head);
 }
 .kahraman h1 em { font-style: normal; color: var(--pink-dark); }
 .alt { font-size: 18px; color: var(--text-2); max-width: 48ch; }
@@ -156,7 +190,7 @@ section { padding: 54px 0; }
 }
 h2 {
   font-size: clamp(25px, 3.4vw, 34px); font-weight: 900;
-  color: var(--ink); letter-spacing: -.01em; text-align: center;
+  color: var(--head); letter-spacing: -.01em; text-align: center;
 }
 .bolum-alt { text-align: center; color: var(--text-2); margin: 10px auto 30px; max-width: 62ch; }
 
@@ -208,7 +242,7 @@ footer {
 footer .kap { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
 footer span { color: var(--text-2); font-size: 15px; }
 .f-baglantilar { display: flex; gap: 18px; flex-wrap: wrap; }
-.f-baglantilar a { color: var(--ink); font-weight: 800; font-size: 15px; text-decoration: none; }
+.f-baglantilar a { color: var(--head); font-weight: 800; font-size: 15px; text-decoration: none; }
 .f-baglantilar a:hover { color: var(--pink-dark); text-decoration: underline; }
 .f-alt { margin-top: 14px; color: var(--text-2); font-size: 13.5px; justify-content: flex-start; }
 

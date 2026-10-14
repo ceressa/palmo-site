@@ -20,7 +20,7 @@ import re
 import struct
 
 from config import (APP, APP_STORE, DEV, DEV_URL, DOMAIN, GOOGLE_PLAY, LANGS,
-                    LEGAL_LANGS, LEGAL_PAGES, PKG, ROOT_LANG, SITE, UPDATED)
+                    LEGAL_LANGS, LEGAL_PAGES, ROOT_LANG, SITE, UPDATED)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -321,7 +321,8 @@ def head(code, page, title, desc, index=True):
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="%(title)s">
     <meta name="twitter:description" content="%(desc)s">
-    <meta name="theme-color" content="#FFF4FB">
+    <meta name="theme-color" content="#FFF4FB" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1B2F4A" media="(prefers-color-scheme: dark)">
     <title>%(title)s</title>
 %(canon)s    %(alts)s
     <link rel="icon" type="image/svg+xml" href="/%(mark)s">%(touch)s
@@ -375,12 +376,12 @@ def footer(code, t):
             <a href="/%(la)s">%(ad)s</a>
         </div>
     </div>
-    <div class="kap f-alt">&copy; 2026 %(dev)s &middot; %(pkg)s</div>
+    <div class="kap f-alt">&copy; 2026 %(dev)s</div>
 </footer>
 
 </body>
 </html>
-""" % dict(by=esc(t["by"]), p=esc(p), tm=esc(tm), ad=esc(ad), pkg=PKG,
+""" % dict(by=esc(t["by"]), p=esc(p), tm=esc(tm), ad=esc(ad),
            dev=DEV, devurl=DEV_URL,
            lp=path_for(lc, "privacy.html"), lt=path_for(lc, "terms.html"),
            la=path_for(lc, "account-deletion.html"))

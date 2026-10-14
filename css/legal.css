@@ -12,7 +12,7 @@
 
 .yasal h1 {
   font-size: clamp(28px, 4.4vw, 38px); font-weight: 900;
-  color: var(--ink); letter-spacing: -.02em; margin-bottom: 6px;
+  color: var(--head); letter-spacing: -.02em; margin-bottom: 6px;
 }
 .yasal .tarih { color: var(--text-2); font-size: 14.5px; font-weight: 800; margin-bottom: 26px; }
 
@@ -25,7 +25,7 @@
 
 .yasal h2 {
   text-align: left; font-size: 20px; margin: 28px 0 8px;
-  color: var(--ink);
+  color: var(--head);
 }
 .yasal h2:first-child { margin-top: 0; }
 .yasal p { margin-bottom: 12px; color: var(--text); }
@@ -35,7 +35,7 @@
  * istiyor), o yuzden kural burada. */
 .yasal ul, .yasal ol { margin: 0 0 14px 20px; }
 .yasal li { margin-bottom: 8px; color: var(--text); }
-.yasal strong { color: var(--ink); }
+.yasal strong { color: var(--head); }
 
 .yasal .vurgu {
   background: var(--well); border: var(--s-patch) solid var(--ink);
@@ -46,6 +46,6 @@
 .geri {
   display: inline-flex; align-items: center; gap: 7px;
   margin-bottom: 22px; text-decoration: none; font-weight: 800; font-size: 15px;
-  color: var(--ink);
+  color: var(--head);
 }
 .geri:hover { color: var(--pink-dark); }
