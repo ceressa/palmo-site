@@ -20,6 +20,12 @@ Kaynak dosyalar ve metnin hangisinden dogruladigi:
                             `isAdmin` (yonetim paneli salt okuma, 11 Ekim
                             2026'dan beri; cumle Colmo ile birebir ayni)
   `lib/telemetry.dart`      olay adlari, daraltilmis riza, Crashlytics uid
+  `lib/notifications.dart`  yerel hatirlatma, izin daveti (en fazla iki),
+                            Android kanallari, `notify_*` olaylari
+  `lib/bildirim_plani.dart` gunde bir, 22:00-09:00 sessiz, 8. gunden sonra yok
+  `lib/state/nickname.dart` takma ad: cihazda uretilir, 2-20 karakter
+  `lib/bardino/`            merkeze ne gittigi (`/acik` tokensiz, sonra token),
+                            cihazda kalan uc anahtar (`palmo.bardino.*`)
   `lib/ads.dart`            AdMob, 11. bolum esigi, UMP, ATT
   `lib/state/economy.dart`  can, gunluk reklam tavanlari, `noAds`
   `lib/billing.dart`        `com.bardino.palmo.remove_ads`, non-consumable
@@ -39,6 +45,14 @@ IKI SEY BILEREK BOYLE YAZILDI, kisaltilmasin:
 14 Ekim 2026: Turkce metin "siz" ile yazildi (uc oyunun yasal metni ayni
 hitapla). Firestore yolu (/users/{uid}) metinden cikarildi, yerine "bulut
 kaydiniz, anonim kimliginizin altinda" deniyor; anlam ayni.
+
+14 Ekim 2026, ikinci duzeltme: hatirlatmalar (1.0.5'ten beri magazada) ve
+palmo origin/main'in getirdikleri (takma ad, `name`/`shards`/`gold`/`daily`
+alanlari, Bardino uyeligi) eklendi. Metin HEM magazadaki surum HEM sonraki
+icin dogru olmali; bu yuzden yeni ozellikler "bu ozelligin bulundugu
+surumlerde" diye isaretli. Bardino merkezinin tuttuklari tekrar edilmiyor,
+yayinlanmis aydinlatma metnine baglaniyor; burada yalniz Palmo'nun kendi
+gonderdigi ve sakladigi var.
 """
 
 from config import MAIL, PKG, DEV, APP
@@ -77,15 +91,20 @@ PRIVACY_EN = (
          "on your phone, what it sends away, who receives it and how to "
          "delete it." % (APP, DEV),
          "It describes the game as it is built today, including the cloud "
-         "save, the optional sign-in, the analytics events and the crash "
-         "reporting.")
+         "save, the optional sign-in, the reminders, the analytics events "
+         "and the crash reporting.",
+         "Some features arrive with an update: the nickname, Today's patch, "
+         "gold cells and Bardino membership. The passages about them are "
+         "marked <em>in versions that have</em> the feature and apply once "
+         "your copy of the game has it; until then the game does not collect "
+         "or send what they describe.")
     + "<h2>2. Your identity in the game</h2>"
     + _p("The first time you open %s it asks Firebase Authentication for an "
          "<strong>anonymous identity</strong>. This happens on its own. You "
          "are not asked for a name, an e-mail address or a phone number, "
-         "there is no sign-up screen and there is no login wall anywhere in "
-         "the game. The identity is a random string, and its only job is to "
-         "be the name of the folder your cloud save sits in." % APP)
+         "and there is no login wall anywhere in the game. The identity is "
+         "a random string, and its only job is to be the name of the folder "
+         "your cloud save sits in." % APP)
     + _p("Linking a <strong>Google</strong> or <strong>Apple</strong> account "
          "is optional. Its only purpose is to let you pick the game up on a "
          "second device, or on the same device after a reinstall. Linking "
@@ -100,6 +119,17 @@ PRIVACY_EN = (
           "the device and the Settings screen shows it so you can see which "
           "account you are on. Where no address is available, that row reads "
           "<em>Linked</em> instead.")
+    + _p("<strong>Nickname</strong> (in versions that have it). On first "
+         "launch the game makes up a nickname on the device from two words "
+         "in your language and a number, for example <em>Swift Thread "
+         "42</em>. Under <strong>Nickname</strong> in Settings you can draw "
+         "a new one or type your own (2 to 20 characters). It is shown on "
+         "the map and in Settings, two of the reminder titles can start with "
+         "it, and it goes into your cloud save (section 4). The name on your "
+         "Google or Apple account is never read, and linking an account does "
+         "not change the nickname. If you share a Today's patch result, the "
+         "text, which includes your nickname, goes wherever you send it from "
+         "your phone's share sheet; the game itself sends it nowhere.")
     + "<h2>3. What stays on your device</h2>"
     + _p("All of this is written with the operating system's own preference "
          "storage. It is the game's real memory: the cloud copy described in "
@@ -118,7 +148,16 @@ PRIVACY_EN = (
           "consent form, and a random identifier generated on the device that "
           "marks which install last wrote to the cloud. That identifier is "
           "made by the game, not read from the phone; reinstalling produces a "
-          "new one.")
+          "new one.",
+          "<strong>Reminders</strong>: whether they are switched on, when the "
+          "scheduled ones are due, when the last one was due, and how many "
+          "times the game has invited you to turn them on.",
+          "<strong>In versions that have these features</strong>: your "
+          "nickname and whether you picked it yourself; gold pieces and "
+          "which gold cells have already paid out; your Today's patch "
+          "record; and, if you use Bardino membership, which account it is "
+          "linked to and any Today's patch wins or nickname change that "
+          "could not be sent yet.")
     + "<h2>4. What is saved to the cloud</h2>"
     + _p("The game keeps one cloud save per player in Cloud Firestore, filed "
          "under your anonymous identity. It holds:")
@@ -129,6 +168,11 @@ PRIVACY_EN = (
           "which lessons you have been taught and whether the tutorial has "
           "been seen;",
           "your settings: music, sound, haptics, path hints and language;",
+          "in versions that have these features: your nickname and whether "
+          "you picked it yourself, your gold pieces, which gold cells have "
+          "already paid out, and your Today's patch record (the last day you "
+          "solved it, your current and longest streak, and the stars and "
+          "time of that day's first solve);",
           "three bookkeeping fields: a format version, the identifier of the "
           "install that wrote last, and a server timestamp of that write.")
     + _p("<strong>Three things are deliberately not sent</strong>: your lives "
@@ -145,27 +189,112 @@ PRIVACY_EN = (
     + _p("The cloud copy is a convenience. If Firebase cannot start, if the "
          "network is down or if a write is refused, the game carries on from "
          "the copy on your phone.")
-    + "<h2>5. Analytics</h2>"
-    + _p("The game sends Firebase Analytics a short list of events, all of "
-         "them about the board rather than about you:")
+    + "<h2>5. Reminders</h2>"
+    + _p("The game can remind you where you left off. Reminders are local "
+         "notifications: the game schedules them on your phone through the "
+         "phone's own notification system. No push service and no server "
+         "are involved, and nothing is sent to us to set them up.")
+    + _ul("<strong>Permission</strong>: on Android 13 and later and on iOS, "
+          "after you finish your first level the game asks in its own window "
+          "whether you want reminders. Only <strong>Remind me</strong> opens "
+          "the phone's permission prompt; <strong>Not now</strong> costs "
+          "nothing, and the game asks at most twice. On Android 12 and "
+          "earlier the phone allows notifications without a prompt, so there "
+          "is no invitation and reminders are on until you switch them off. "
+          "Switching <strong>Notifications</strong> on in Settings opens the "
+          "prompt if permission is missing. On Android the game also holds "
+          "the permission that keeps scheduled reminders after the phone "
+          "restarts; it does not ask for exact alarms.",
+          "<strong>What and when</strong>: reminders are set when you leave "
+          "the game and all removed when you come back, so none arrives while "
+          "you play. The text is put together on the phone from your "
+          "progress: the level you are on, the chapter's name and how many "
+          "of its levels are left, when your lives are full again, and how "
+          "many levels you have cleared. In versions that have a nickname, "
+          "two of the titles can start with it. At most one reminder a day, "
+          "none between 22:00 and 09:00, and none after the eighth day.",
+          "<strong>What leaves the phone</strong>: two analytics events "
+          "(section 7), and an error report if setting a reminder fails "
+          "(section 8). One event says that you tapped a reminder, which kind it "
+          "was and how many days after your session it was set for; the "
+          "other says how you answered the invitation and whether the phone "
+          "granted permission. The reminder text itself is never sent.",
+          "<strong>Switching them off</strong>: turn off "
+          "<strong>Notifications</strong> in Settings, which also removes "
+          "any reminder already scheduled, or block them in your phone's "
+          "settings. On Android the two kinds, <em>Lives refilled</em> and "
+          "<em>Progress reminders</em>, can be switched off separately.")
+    + _p("The reminder setting and schedule stay on the device; they are not "
+         "part of the cloud save.")
+    + "<h2>6. Bardino membership</h2>"
+    + _p("In versions that have it, %s offers <strong>Bardino "
+         "membership</strong>: an optional, free membership shared by three "
+         "Bardino games (Decimo, Colmo and %s) that gives one nickname "
+         "across them, a shared daily streak and gifts. What Bardino's "
+         "server keeps, for how long and on what legal basis is set out in "
+         "the <a href=\"https://bardino.app/uyelik/aydinlatma\">Bardino "
+         "membership notice</a>. This section covers only what %s itself "
+         "sends and stores." % (APP, APP, APP))
+    + _ul("<strong>Before you join</strong>: the game asks Bardino's server "
+          "whether membership is open. That request carries no identity. If "
+          "membership is open and you have linked a Google or Apple account, "
+          "the game also sends your sign-in token, which contains that "
+          "account's e-mail address, so the server can tell whether you are "
+          "already a member. A player who has not linked an account sends no "
+          "token.",
+          "<strong>When you join</strong>: joining needs a Google or Apple "
+          "sign-in, and you tick a box confirming the terms, the notice and "
+          "that you are 13 or older. Along with your sign-in token, the game "
+          "sends the version of the terms you accepted, that confirmation "
+          "and, for a new membership, your current %s nickname." % APP,
+          "<strong>While you are a member</strong>: every request carries "
+          "your sign-in token. The game asks for your membership status from "
+          "time to time, and sends the date of each Today's patch you solve "
+          "(your local day), a nickname you change, and the gifts you claim. "
+          "In return it receives your "
+          "shared nickname, which replaces the %s one, your shared streak "
+          "and your gifts; claimed gifts are added to your jokers." % APP,
+          "<strong>On the phone</strong>: which %s account the membership is "
+          "linked to, and any Today's patch wins or nickname change that "
+          "could not be sent yet, for example while offline. None of this "
+          "goes into the cloud save." % APP,
+          "<strong>Leaving</strong>: <strong>Leave Bardino</strong> in "
+          "Settings deletes your membership record for all three games. Your "
+          "%s progress and the gifts you already claimed stay. Deleting your "
+          "%s account (section 11) does not end the membership; if you want "
+          "both gone, leave Bardino first." % (APP, APP))
+    + "<h2>7. Analytics</h2>"
+    + _p("The game sends Firebase Analytics a short list of events about "
+         "play rather than about you:")
     + _ul("a level was opened, and a level was finished with its star count, "
-          "its duration and how many settled regions you pulled apart;",
+          "its duration, how many settled regions you pulled apart, how many "
+          "moves the board refused and how many hints appeared;",
           "a level ended without being solved, split into the case where the "
           "board ran out of moves and the case where you left it;",
           "a board reached a dead end, and how much budget was left;",
-          "a settled region was pulled apart;",
+          "a settled region was pulled apart, a hint appeared, or a life was "
+          "handed back;",
           "a joker was used, and which of the three it was;",
-          "an ad was shown, and whether it paid out;",
+          "an ad was shown, whether it paid out, and the revenue AdMob "
+          "reports for it;",
           "the ad-free version was bought;",
-          "an account was linked, and whether it was Google or Apple.")
+          "an account was linked, and whether it was Google or Apple;",
+          "the store's rating prompt was requested, and whether a Google Play "
+          "Games or Game Center step worked;",
+          "a reminder was tapped, and how you answered the reminder "
+          "invitation (section 5);",
+          "in versions that have these features: Today's patch was opened, "
+          "solved, left or shared, with the day, stars, duration and streak; "
+          "a gold cell was broken; gold pieces became a joker; the Bardino "
+          "card was shown, membership was joined, failed or left, a gift was "
+          "claimed, or a sibling game's store page was opened.")
     + _p("Consent for analytics is narrowed in code before the first event is "
          "sent: ad storage, ad personalisation signals and ad user data are "
          "all set to denied, and only analytics storage is allowed. The "
          "anonymous identity is not passed to Analytics, so these events "
-         "arrive as counts rather than as a profile. There is no level of "
-         "detail here that could carry a name, a message or anything you "
-         "typed, because the game has no text entry of any kind.")
-    + "<h2>6. Crash reports</h2>"
+         "arrive as counts rather than as a profile. None of them carries "
+         "your nickname, your e-mail address or anything else you typed.")
+    + "<h2>8. Crash reports</h2>"
     + _p("Firebase Crashlytics records crashes and the handled errors that "
          "should not pass silently, such as a refused cloud write or a "
          "sign-in that failed. A report contains the stack trace and the "
@@ -176,7 +305,7 @@ PRIVACY_EN = (
          "crash can be matched with the cloud save it belongs to when we are "
          "working out what went wrong. That identity is a random string with "
          "no name, e-mail address or device identifier in it.")
-    + "<h2>7. Ads</h2>"
+    + "<h2>9. Ads</h2>"
     + _ul("<strong>Between levels</strong> (Google AdMob): from level 11 "
           "onwards a full-screen ad can appear, at most one every four levels "
           "and not within three minutes of the last one. There is never an ad "
@@ -201,27 +330,32 @@ PRIVACY_EN = (
           "may track you across other companies' apps and websites. Saying no "
           "changes nothing about the game; it only means the ads you see are "
           "not personalised.")
-    + "<h2>8. Purchases</h2>"
+    + "<h2>10. Purchases</h2>"
     + _p("There is one purchase, it removes the ads, and it is a one-off "
          "rather than a subscription. It is sold by Google Play and the App "
          "Store: payment happens inside the store, we are not the seller of "
          "record, and no card number or billing address reaches us. The game "
          "keeps a yes/no flag on the device and asks the store to confirm it "
          "again on a new one.")
-    + "<h2>9. Deleting your data</h2>"
+    + "<h2>11. Deleting your data</h2>"
     + _p("You can delete the cloud save and the identity it is filed under "
          "from inside the game, and you can clear the copy on your phone "
          "separately. The steps for each, and what each one does not cover, "
          "are set out on the <a href=\"/account-deletion.html\">Account "
-         "deletion</a> page.")
-    + "<h2>10. Children</h2>"
-    + _p("%s contains no chat and no user-generated content, and there is "
-         "nowhere in it to type anything. It is not directed at children. The "
+         "deletion</a> page.",
+         "Bardino membership is separate: <strong>Leave Bardino</strong> in "
+         "Settings deletes it (section 6).")
+    + "<h2>12. Children</h2>"
+    + _p("%s contains no chat and no content from other players. The only "
+         "thing you can type is your nickname, in versions that have one, "
+         "and it appears only on your own screens and in a Today's patch "
+         "result you choose to share. The game is not directed at children, "
+         "and Bardino membership is open only to people aged 13 or over. The "
          "game does show ads, so it is rated for a general audience rather "
          "than declared a children's app." % APP)
-    + "<h2>11. Changes</h2>"
+    + "<h2>13. Changes</h2>"
     + _p("Material changes to this page are published here with a new date.")
-    + "<h2>12. Contact</h2>"
+    + "<h2>14. Contact</h2>"
     + _p("%s &middot; %s" % (_mail(), PKG)))
 
 PRIVACY_TR = (
@@ -230,14 +364,19 @@ PRIVACY_TR = (
          "telefonunuzda ne tuttuğunu, dışarıya ne gönderdiğini, bunları kimin "
          "aldığını ve nasıl silebileceğinizi anlatır." % (APP, DEV),
          "Anlatılan, oyunun bugünkü halidir: bulut kaydı, isteğe bağlı giriş, "
-         "ölçüm olayları ve çökme raporlaması dahil.")
+         "hatırlatmalar, ölçüm olayları ve çökme raporlaması dahil.",
+         "Bazı özellikler bir güncellemeyle gelir: takma ad, günün yaması, "
+         "altın hücreler ve Bardino üyeliği. Bunları anlatan kısımlar "
+         "<em>bu özelliğin bulunduğu sürümlerde</em> diye işaretlidir ve "
+         "oyununuzun sürümünde o özellik varsa geçerlidir; o zamana kadar "
+         "oyun, o kısımlarda anlatılanı toplamaz ve göndermez.")
     + "<h2>2. Oyundaki kimliğiniz</h2>"
     + _p("%s'yu ilk açtığınızda oyun, Firebase Authentication'dan bir "
          "<strong>anonim kimlik</strong> ister. Bu kendiliğinden olur. Sizden "
-         "isim, e-posta adresi ya da telefon numarası istenmez; kayıt ekranı "
-         "yoktur ve oyunun hiçbir yerinde giriş zorunluluğu yoktur. Kimlik "
-         "rastgele bir karakter dizisidir ve tek işi, bulut kaydınızın "
-         "durduğu klasörün adı olmaktır." % APP)
+         "isim, e-posta adresi ya da telefon numarası istenmez ve oyunun "
+         "hiçbir yerinde giriş zorunluluğu yoktur. Kimlik rastgele bir "
+         "karakter dizisidir ve tek işi, bulut kaydınızın durduğu klasörün "
+         "adı olmaktır." % APP)
     + _p("<strong>Google</strong> ya da <strong>Apple</strong> hesabı bağlamak "
          "isteğe bağlıdır. Tek amacı, oyuna ikinci bir cihazda ya da aynı "
          "cihazda yeniden kurulumdan sonra kaldığınız yerden devam "
@@ -251,6 +390,17 @@ PRIVACY_TR = (
           "Bir adres geldiyse Firebase Authentication onu cihazda tutar ve "
           "Ayarlar ekranı, hangi hesapla bağlı olduğunuzu görebilmeniz için "
           "onu gösterir. Adres yoksa o satırda <em>Bağlı</em> yazar.")
+    + _p("<strong>Takma ad</strong> (bu özelliğin bulunduğu sürümlerde). Oyun "
+         "ilk açılışta, cihazda, dilinizdeki iki kelime ve bir sayıdan bir "
+         "takma ad üretir; örneğin <em>Sabırlı Yama 42</em>. Ayarlar'daki "
+         "<strong>Takma ad</strong> satırından yenisini çekebilir ya da kendi "
+         "adınızı yazabilirsiniz (2-20 karakter). Ad haritada ve Ayarlar'da "
+         "görünür, iki hatırlatmanın başlığı onunla başlayabilir ve bulut "
+         "kaydınıza girer (4. madde). Google ya da Apple hesabınızdaki ad "
+         "hiçbir zaman okunmaz; hesap bağlamak takma adı değiştirmez. Günün "
+         "yaması sonucunu paylaşırsanız, takma adınızı da içeren metin "
+         "telefonunuzun paylaşma penceresinden nereye gönderirseniz oraya "
+         "gider; oyunun kendisi onu hiçbir yere göndermez.")
     + "<h2>3. Cihazınızda kalanlar</h2>"
     + _p("Bunların hepsi işletim sisteminin kendi tercih deposuna yazılır. "
          "Oyunun asıl hafızası burasıdır: bir sonraki bölümde anlatılan bulut "
@@ -268,7 +418,16 @@ PRIVACY_TR = (
           "cevap ve buluta en son hangi kurulumun yazdığını işaretleyen, "
           "cihazda üretilmiş rastgele bir tanımlayıcı. Bu tanımlayıcı "
           "telefondan okunmaz, oyun tarafından üretilir; uygulamayı yeniden "
-          "kurmak yenisini üretir.")
+          "kurmak yenisini üretir.",
+          "<strong>Hatırlatmalar</strong>: açık olup olmadıkları, kurulu "
+          "hatırlatmaların ve sonuncusunun zamanı ve oyunun sizi kaç kez "
+          "hatırlatmaları açmaya davet ettiği.",
+          "<strong>Bu özelliklerin bulunduğu sürümlerde</strong>: takma "
+          "adınız ve onu kendiniz seçip seçmediğiniz; altın parçalar ve hangi "
+          "altın hücrelerin ödendiği; günün yaması kaydınız; Bardino "
+          "üyeliğini kullanıyorsanız da üyeliğin hangi hesaba bağlı olduğu ve "
+          "henüz gönderilemeyen günün yaması çözümleri ya da takma ad "
+          "değişikliği.")
     + "<h2>4. Buluta gidenler</h2>"
     + _p("Oyun, Cloud Firestore'da her oyuncu için tek bir bulut kaydı tutar; "
          "kayıt anonim kimliğinizin altında durur. Kayıtta şunlar bulunur:")
@@ -278,6 +437,10 @@ PRIVACY_TR = (
           "joker sayıları ve ödenmiş bölük ödülleri;",
           "hangi dersleri öğrendiğiniz ve öğreticinin görülüp görülmediği;",
           "ayarlarınız: müzik, ses, titreşim, yol ipucu ve dil;",
+          "bu özelliklerin bulunduğu sürümlerde: takma adınız ve onu kendiniz "
+          "seçip seçmediğiniz, altın parçalarınız, hangi altın hücrelerin "
+          "ödendiği ve günün yaması kaydınız (en son çözdüğünüz gün, güncel "
+          "ve en uzun seriniz, o günün ilk çözümündeki yıldız ve süre);",
           "üç kayıt alanı: biçim sürümü, en son yazan kurulumun tanımlayıcısı "
           "ve o yazmanın sunucu zaman damgası.")
     + _p("<strong>Üç şey bilerek gönderilmez</strong>: canlarınız ve sayacı, "
@@ -294,27 +457,112 @@ PRIVACY_TR = (
     + _p("Bulut kopyası bir kolaylıktır. Firebase başlatılamazsa, ağ yoksa ya "
          "da bir yazma reddedilirse oyun, telefonunuzdaki kopyadan devam "
          "eder.")
-    + "<h2>5. Ölçüm</h2>"
+    + "<h2>5. Hatırlatmalar</h2>"
+    + _p("Oyun, kaldığınız yeri size hatırlatabilir. Hatırlatmalar yerel "
+         "bildirimdir: oyun onları telefonun kendi bildirim sistemiyle "
+         "telefonunuzda kurar. Push hizmeti ya da sunucu kullanılmaz; kurmak "
+         "için bize hiçbir şey gönderilmez.")
+    + _ul("<strong>İzin</strong>: Android 13 ve sonrasında ve iOS'ta, ilk "
+          "bölümü bitirdiğinizde oyun kendi penceresinde hatırlatma isteyip "
+          "istemediğinizi sorar. Telefonun izin penceresini yalnızca "
+          "<strong>Hatırlat</strong> açar; <strong>Şimdi değil</strong> "
+          "demenin hiçbir bedeli yoktur ve oyun en fazla iki kez sorar. "
+          "Android 12 ve öncesinde telefon bildirimlere sormadan izin verir; "
+          "bu yüzden davet gösterilmez ve siz kapatana kadar hatırlatmalar "
+          "açıktır. İzin yokken Ayarlar'da <strong>Bildirimler</strong>'i "
+          "açmak da izin penceresini açar. Android'de oyun ayrıca kurulu "
+          "hatırlatmaların telefon yeniden başladıktan sonra da kalmasını "
+          "sağlayan izni taşır; kesin alarm izni istemez.",
+          "<strong>Ne ve ne zaman</strong>: hatırlatmalar oyundan "
+          "çıktığınızda kurulur, geri döndüğünüzde hepsi silinir; yani "
+          "oynarken hiçbiri gelmez. Metin telefonda, ilerlemenizden "
+          "oluşturulur: bulunduğunuz bölüm, bölüğün adı ve bitmesine kalan "
+          "bölüm sayısı, canlarınızın ne zaman dolacağı ve kaç bölüm "
+          "bitirdiğiniz. Takma adın bulunduğu sürümlerde iki hatırlatmanın "
+          "başlığı onunla başlayabilir. Günde en fazla bir hatırlatma gelir; "
+          "22.00 ile 09.00 arasında hiç gelmez, sekizinci günden sonra da "
+          "gelmez.",
+          "<strong>Telefondan çıkanlar</strong>: iki ölçüm olayı (7. madde) "
+          "ve bir hatırlatma kurulamazsa bir hata raporu (8. madde). "
+          "Olaylardan biri bir hatırlatmaya dokunduğunuzu, hangi tür olduğunu ve "
+          "oturumunuzdan kaç gün sonrasına kurulduğunu söyler; diğeri davete "
+          "ne cevap verdiğinizi ve telefonun izin verip vermediğini. "
+          "Hatırlatma metni hiçbir yere gönderilmez.",
+          "<strong>Kapatmak</strong>: Ayarlar'da <strong>Bildirimler</strong>'i "
+          "kapatın; bu, kurulu hatırlatmaları da siler. Ya da telefonunuzun "
+          "ayarlarından engelleyin. Android'de iki tür, <em>Canlar doldu</em> "
+          "ve <em>İlerleme hatırlatmaları</em>, ayrı ayrı kapatılabilir.")
+    + _p("Hatırlatma ayarı ve takvimi cihazda kalır, bulut kaydına girmez.")
+    + "<h2>6. Bardino üyeliği</h2>"
+    + _p("Bu özelliğin bulunduğu sürümlerde %s, <strong>Bardino "
+         "üyeliği</strong> sunar: üç Bardino oyununun (Decimo, Colmo ve %s) "
+         "ortak, isteğe bağlı ve ücretsiz üyeliği; üç oyunda tek takma ad, "
+         "ortak günlük seri ve hediyeler. Bardino sunucusunun neyi, ne kadar "
+         "süre ve hangi hukuki sebeple tuttuğu "
+         "<a href=\"https://bardino.app/uyelik/aydinlatma\">Bardino Üyeliği "
+         "Aydınlatma Metni</a>'nde yazılıdır. Bu bölüm yalnızca %s'nun "
+         "kendisinin gönderdiklerini ve sakladıklarını anlatır."
+         % (APP, APP, APP))
+    + _ul("<strong>Üye olmadan önce</strong>: oyun, Bardino sunucusuna "
+          "üyeliğin açık olup olmadığını sorar. Bu istek hiçbir kimlik "
+          "taşımaz. Üyelik açıksa ve bir Google ya da Apple hesabı "
+          "bağladıysanız oyun, zaten üye olup olmadığınızın anlaşılabilmesi "
+          "için giriş jetonunuzu da gönderir; bu jeton o hesabın e-posta "
+          "adresini içerir. Hesap bağlamamış bir oyuncu jeton göndermez.",
+          "<strong>Üye olurken</strong>: üyelik için Google ya da Apple ile "
+          "giriş gerekir ve koşulları, aydınlatma metnini ve 13 yaşında ya "
+          "da daha büyük olduğunuzu onaylayan kutuyu işaretlersiniz. Oyun, "
+          "giriş jetonunuzla birlikte kabul ettiğiniz koşulların sürümünü, "
+          "bu onayı ve yeni bir üyelikte o anki %s takma adınızı "
+          "gönderir." % APP,
+          "<strong>Üyeyken</strong>: her istek giriş jetonunuzu taşır. Oyun "
+          "zaman zaman üyelik durumunuzu sorar; çözdüğünüz her günün "
+          "yamasının tarihini (kendi yerel gününüz), değiştirdiğiniz takma "
+          "adı ve aldığınız hediyeleri gönderir. Karşılığında ortak takma adınızı "
+          "(%s'daki adın yerine geçer), ortak serinizi ve hediyelerinizi "
+          "alır; aldığınız hediyeler jokerlerinize eklenir." % APP,
+          "<strong>Telefonda</strong>: üyeliğin hangi %s hesabına bağlı "
+          "olduğu ve henüz gönderilemeyen günün yaması çözümleri ya da takma "
+          "ad değişikliği (örneğin çevrimdışıyken). Bunların hiçbiri bulut "
+          "kaydına girmez." % APP,
+          "<strong>Ayrılmak</strong>: Ayarlar'daki <strong>Bardino "
+          "üyeliğinden çık</strong> satırı, üç oyundaki üyelik kaydınızı "
+          "siler. %s'daki ilerlemeniz ve aldığınız hediyeler kalır. %s "
+          "hesabınızı silmek (11. madde) üyeliği sona erdirmez; ikisinin de "
+          "silinmesini istiyorsanız önce Bardino'dan çıkın." % (APP, APP))
+    + "<h2>7. Ölçüm</h2>"
     + _p("Oyun, Firebase Analytics'e kısa bir olay listesi gönderir; hepsi "
-         "sizinle değil, tahtayla ilgilidir:")
-    + _ul("bir bölüm açıldı; bir bölüm bitti: yıldızı, süresi ve kaç oturmuş "
-          "bölgeyi söktüğünüz;",
+         "sizinle değil, oyunla ilgilidir:")
+    + _ul("bir bölüm açıldı; bir bölüm bitti: yıldızı, süresi, kaç oturmuş "
+          "bölgeyi söktüğünüz, tahtanın kaç hamleyi reddettiği ve kaç ipucu "
+          "belirdiği;",
           "bir bölüm çözülmeden bitti: tahtada hamle kalmadığı durum ile sizin "
           "bıraktığınız durum ayrı ayrı;",
           "tahta çıkmaza girdi ve geriye ne kadar vuruş hakkı kaldı;",
-          "oturmuş bir bölge söküldü;",
+          "oturmuş bir bölge söküldü, bir ipucu belirdi ya da bir can geri "
+          "verildi;",
           "bir joker kullanıldı ve üçünden hangisi olduğu;",
-          "bir reklam gösterildi ve ödül kazandırıp kazandırmadığı;",
+          "bir reklam gösterildi, ödül kazandırıp kazandırmadığı ve AdMob'un "
+          "o reklam için bildirdiği gelir;",
           "reklamsız sürüm satın alındı;",
-          "bir hesap bağlandı ve Google mı Apple mı olduğu.")
+          "bir hesap bağlandı ve Google mı Apple mı olduğu;",
+          "mağazanın puanlama penceresi istendi; bir Google Play Games ya da "
+          "Game Center adımı çalıştı ya da çalışmadı;",
+          "bir hatırlatmaya dokunuldu ve hatırlatma davetine ne cevap "
+          "verildi (5. madde);",
+          "bu özelliklerin bulunduğu sürümlerde: günün yaması açıldı, "
+          "çözüldü, bırakıldı ya da paylaşıldı (gün, yıldız, süre ve seriyle); "
+          "bir altın hücre kırıldı; altın parçalar jokere dönüştü; Bardino "
+          "kartı gösterildi, üyelik başladı, başlayamadı ya da sona erdi, "
+          "bir hediye alındı ya da bir kardeş oyunun mağaza sayfası açıldı.")
     + _p("Ölçüm rızası, ilk olay gönderilmeden önce kodda daraltılır: reklam "
          "depolaması, reklam kişiselleştirme sinyalleri ve reklam kullanıcı "
          "verisi reddedilmiş olarak ayarlanır, yalnızca ölçüm depolamasına "
          "izin verilir. Anonim kimliğiniz Analytics'e verilmez; bu olaylar "
-         "bir profil olarak değil, toplam sayılar olarak birikir. Bu "
-         "olaylarda isim, mesaj ya da yazdığınız bir şey bulunamaz, çünkü "
-         "oyunda hiçbir yazı girişi yoktur.")
-    + "<h2>6. Çökme raporları</h2>"
+         "bir profil olarak değil, toplam sayılar olarak birikir. Hiçbiri "
+         "takma adınızı, e-posta adresinizi ya da yazdığınız başka bir şeyi "
+         "taşımaz.")
+    + "<h2>8. Çökme raporları</h2>"
     + _p("Firebase Crashlytics, çökmeleri ve sessizce geçilmemesi gereken "
          "yakalanmış hataları kaydeder: reddedilen bir bulut yazması ya da "
          "başarısız bir giriş gibi. Bir rapor, hata yığınını ve Crashlytics "
@@ -325,7 +573,7 @@ PRIVACY_TR = (
          "ararken çökmenin hangi bulut kaydına ait olduğunu eşleştirebilmek "
          "için. Bu kimlik rastgele bir karakter dizisidir; içinde isim, "
          "e-posta adresi ya da cihaz kimliği yoktur.")
-    + "<h2>7. Reklamlar</h2>"
+    + "<h2>9. Reklamlar</h2>"
     + _ul("<strong>Bölüm aralarında</strong> (Google AdMob): 11. bölümden "
           "itibaren tam ekran bir reklam çıkabilir; en fazla dört bölümde bir "
           "ve son reklamdan üç dakika geçmeden değil. Sıfır yıldızla biten "
@@ -352,29 +600,34 @@ PRIVACY_TR = (
           "şirketlerin uygulama ve web sitelerinde takip edip "
           "edemeyeceğini sorar. Hayır demek oyunda hiçbir şeyi değiştirmez; "
           "yalnızca gördüğünüz reklamlar kişiselleştirilmemiş olur.")
-    + "<h2>8. Satın alma</h2>"
+    + "<h2>10. Satın alma</h2>"
     + _p("Tek bir satın alma vardır: reklamları kaldırır ve abonelik değil, "
          "tek seferliktir. Satışı Google Play ve App Store yapar: ödeme "
          "mağazanın içinde gerçekleşir, kayıtlı satıcı biz değiliz ve kart "
          "numaranız ya da fatura adresiniz bize ulaşmaz. Oyun cihazda bir "
          "evet/hayır işareti tutar ve yeni bir cihazda bunu mağazaya yeniden "
          "doğrulatır.")
-    + "<h2>9. Verilerinizi silme</h2>"
+    + "<h2>11. Verilerinizi silme</h2>"
     + _p("Bulut kaydınızı ve bağlı olduğu kimliği oyunun içinden silebilir, "
          "telefonunuzdaki kopyayı da ayrıca temizleyebilirsiniz. Her ikisinin "
          "adımları ve hangisinin neyi kapsamadığı "
          "<a href=\"/tr/account-deletion.html\">Hesap silme</a> sayfasında "
-         "yazılıdır.")
-    + "<h2>10. Çocuklar</h2>"
-    + _p("%s'da sohbet ve kullanıcı içeriği yoktur; oyunun hiçbir yerinde bir "
-         "şey yazılabilecek bir alan yoktur. Oyun çocuklara yönelik değildir. "
-         "Reklam gösterdiği için genel kitleye uygun olarak "
-         "derecelendirilmiştir, çocuk uygulaması olarak beyan "
+         "yazılıdır.",
+         "Bardino üyeliği ayrıdır: onu Ayarlar'daki <strong>Bardino "
+         "üyeliğinden çık</strong> satırı siler (6. madde).")
+    + "<h2>12. Çocuklar</h2>"
+    + _p("%s'da sohbet ve başka oyunculardan gelen içerik yoktur. "
+         "Yazabileceğiniz tek şey, bu özelliğin bulunduğu sürümlerde takma "
+         "adınızdır; o da yalnızca kendi ekranlarınızda ve paylaşmayı "
+         "seçtiğiniz bir günün yaması sonucunda görünür. Oyun çocuklara "
+         "yönelik değildir; Bardino üyeliği de yalnızca 13 yaşında ya da "
+         "daha büyük olanlara açıktır. Reklam gösterdiği için genel kitleye "
+         "uygun olarak derecelendirilmiştir, çocuk uygulaması olarak beyan "
          "edilmemiştir." % APP)
-    + "<h2>11. Değişiklikler</h2>"
+    + "<h2>13. Değişiklikler</h2>"
     + _p("Bu sayfadaki önemli değişiklikler yeni bir tarihle burada "
          "yayımlanır.")
-    + "<h2>12. İletişim</h2>"
+    + "<h2>14. İletişim</h2>"
     + _p("%s &middot; %s" % (_mail(), PKG)))
 
 # ── Kullanim kosullari ──────────────────────────────────────────────────────
