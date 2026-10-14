@@ -16,7 +16,9 @@ gosterecek; beyanla celisen sayfa incelemeyi takar.
 Kaynak dosyalar ve metnin hangisinden dogruladigi:
   `lib/cloud_sync.dart`     anonim kimlik, `kCloudFields` listesi, baglama,
                             `deleteAccount()` sirasi (once belge sonra kimlik)
-  `firestore.rules`         `/users/{uid}`, `isOwner`, varsayilan ret
+  `firestore.rules`         `/users/{uid}`, `isOwner`, varsayilan ret,
+                            `isAdmin` (yonetim paneli salt okuma, 11 Ekim
+                            2026'dan beri; cumle Colmo ile birebir ayni)
   `lib/telemetry.dart`      olay adlari, daraltilmis riza, Crashlytics uid
   `lib/ads.dart`            AdMob, 11. bolum esigi, UMP, ATT
   `lib/state/economy.dart`  can, gunluk reklam tavanlari, `noAds`
@@ -134,9 +136,9 @@ PRIVACY_EN = (
          "flag. Lives are a timer rather than a possession, and the ad-free "
          "purchase belongs to the store, which is the only thing that can "
          "confirm it.")
-    + _p("The database rules require that a request is signed in and that the "
-         "identity making it is the identity the save is filed under, for "
-         "reading, writing and deleting alike. Players have no query that "
+    + _p("Access rules restrict every record to the account that owns it; "
+         "the only other access is read-only access for Bardino's own "
+         "administration account. Players have no query that "
          "lists the saves, so one save cannot be reached from another. "
          "Everything else in the database is refused by default. The rules are "
          "published as part of every deployment.")
@@ -282,9 +284,9 @@ PRIVACY_TR = (
          "günlük ödüllü reklam haklarınız ve reklamsızlık işareti. Can bir "
          "varlık değil, bir zaman sınırıdır; reklamsız satın alma ise "
          "mağazaya aittir ve onu doğrulayabilecek tek yer mağazadır.")
-    + _p("Veritabanı kuralları, isteğin giriş yapılmış bir kimlikten "
-         "gelmesini ve bu kimliğin kaydın altında durduğu kimlikle aynı "
-         "olmasını şart koşar; okuma, yazma ve silmede aynı şekilde. "
+    + _p("Erişim kuralları her kaydı yalnızca sahibi olan hesapla sınırlar; "
+         "bunun dışındaki tek erişim, Bardino'nun kendi yönetim hesabının "
+         "salt okuma erişimidir. "
          "Oyuncuların kayıtları listeleyebileceği bir sorgu yoktur; bu yüzden "
          "bir kayıttan başka bir kayda ulaşılamaz. Veritabanındaki diğer her "
          "şey varsayılan olarak reddedilir. Kurallar her dağıtımın parçası "

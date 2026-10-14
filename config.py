@@ -22,7 +22,7 @@ GOOGLE_PLAY = "https://play.google.com/store/apps/details?id=" + PKG
 # Sayfa basina son guncelleme. Colmo'da tek global tarih vardi ve bir sayfa
 # degisince ucunun de tarihi degisiyordu; okuyan icin bu bir yalan.
 UPDATED = {
-    "privacy.html": "2026-08-30",
+    "privacy.html": "2026-10-14",
     "terms.html": "2026-08-30",
     "account-deletion.html": "2026-08-30",
 }
